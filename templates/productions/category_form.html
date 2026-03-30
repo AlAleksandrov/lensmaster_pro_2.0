@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if form.instance.pk %}Edit Category - LensMaster Pro
+    {% else %}Add Category - LensMaster Pro
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+    <div class="col-md-10 col-lg-9">
+        <div class="card border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+
+                <!-- LEFT SIDE: INFO PANEL -->
+                <div class="col-md-4 p-4 p-md-5 d-flex flex-column justify-content-center border-end lm-bg-panel">
+                    {% if form.instance.pk %}
+                    <h2 class="h4 fw-bold mb-2">Edit Category</h2>
+                    <p class="text-muted mb-4 small">
+                        Update the name, description and cover image for this portfolio category.
+                    </p>
+                    {% else %}
+                    <h2 class="h4 fw-bold mb-2">New Category</h2>
+                    <p class="text-muted mb-4 small">
+                        Create a new category to organise your portfolio and help clients find your work.
+                    </p>
+                    {% endif %}
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2">✅ Category name & slug</li>
+                        <li class="mb-2">✅ Short description</li>
+                        <li class="mb-2">✅ Cover image</li>
+                        <li class="mb-2">✅ Groups related productions</li>
+                    </ul>
+                </div>
+
+                <!-- RIGHT SIDE: FORM -->
+                <div class="col-md-8 bg-white p-4 p-md-5">
+
+                    <!-- ERROR MESSAGES -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-4 small mb-4">
+                        <p class="fw-bold mb-2">Please correct the following:</p>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+
+                        <!-- NAME -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Category Name</label>
+                            {{ form.name }}
+                        </div>
+
+                        <!-- DESCRIPTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Description</label>
+                            {{ form.description }}
+                            <div class="form-text lm-text-xs">
+                                Brief description shown on the portfolio page.
+                            </div>
+                        </div>
+
+                        <!-- COVER IMAGE -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Cover Image</label>
+                            {% if form.instance.pk and form.instance.cover_image %}
+                                <div class="d-flex align-items-center gap-3 mb-2 p-2 border rounded-3 bg-light">
+                                    <img src="{{ form.instance.cover_image.url }}"
+                                         class="rounded object-fit-cover"
+                                         style="width: 56px; height: 56px;" alt="Current cover">
+                                    <span class="text-muted small">Current image — upload a new one to replace it.</span>
+                                </div>
+                            {% endif %}
+                            {{ form.cover_image }}
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-4 pt-3 border-top">
+                            <a href="{% url 'productions:category_list' %}" class="text-muted text-decoration-none small">
+                                ← Back to Portfolio
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill fw-bold">
+                                {% if form.instance.pk %}Save Changes{% else %}Create Category{% endif %}
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

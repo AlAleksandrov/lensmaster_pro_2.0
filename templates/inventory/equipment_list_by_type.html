@@ -1,0 +1,49 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ type_label }} - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="py-5">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+        <div>
+            <a href="{% url 'inventory:equipment_list' %}" class="text-secondary text-decoration-none small">
+                <i class="bi bi-arrow-left me-1"></i> All Equipment
+            </a>
+            <h1 class="display-5 fw-bold text-white mt-1">{{ type_label }}</h1>
+        </div>
+    </div>
+    <p class="text-secondary mb-5">{{ page_obj.paginator.count }} item{{ page_obj.paginator.count|pluralize }} found</p>
+
+    <div class="row g-4">
+        {% for item in equipment_list %}
+        <div class="col-md-6 col-lg-4">
+            <div class="card h-100 bg-dark text-white border-secondary rounded-4 shadow-lg overflow-hidden position-relative">
+                {% if item.cover_image %}
+                <div style="height: 180px; overflow: hidden;">
+                    <img src="{{ item.cover_image.url }}" alt="{{ item.brand }} {{ item.model }}"
+                         style="width: 100%; height: 180px; object-fit: cover;">
+                </div>
+                {% else %}
+                <div class="bg-black bg-opacity-25 d-flex align-items-center justify-content-center" style="height: 180px;">
+                    <span class="text-secondary small">No image</span>
+                </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h4 class="h5 fw-bold mb-0">{{ item.brand }}</h4>
+                    <p class="text-secondary small mb-4">Model: {{ item.model }}</p>
+                    <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
+                        <code class="text-success small">{{ item.internal_id }}</code>
+                        <span class="text-secondary small">View Details →</span>
+                    </div>
+                    <a href="{% url 'inventory:equipment_detail' item.pk %}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 border border-secondary border-dashed rounded-4 w-100">
+            <p class="text-secondary mb-0">No equipment found.</p>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

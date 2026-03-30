@@ -1,0 +1,1 @@
+antenv/bin/gunicorn --bind=0.0.0.0 --timeout 600 --chdir=/home/site/wwwroot lensmaster_pro.wsgi:application

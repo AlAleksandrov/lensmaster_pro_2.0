@@ -1,0 +1,121 @@
+{% extends 'base.html' %}
+
+{% block title %}Booking Requests - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="container py-4 py-lg-5">
+
+    <!-- HEADER -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">Booking Requests</h1>
+            <p class="text-muted small mb-0">All incoming session requests from clients.</p>
+        </div>
+        <a href="{% url 'bookings:booking_request' %}" class="btn btn-success rounded-pill px-4 fw-bold">
+            + New Booking
+        </a>
+    </div>
+
+    <!-- FILTERS -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-sm-6 col-md-4">
+            <input type="text" name="q" value="{{ search_query }}"
+                   class="form-control rounded-pill"
+                   placeholder="Search by name, email, phone...">
+        </div>
+        <div class="col-sm-4 col-md-3">
+            <select name="status" class="form-select rounded-pill">
+                <option value="">All statuses</option>
+                {% for value, label in status_choices %}
+                    <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+        <div class="col-auto">
+            <button type="submit" class="btn btn-outline-secondary rounded-pill px-4">Filter</button>
+            {% if search_query or current_status %}
+                <a href="{% url 'bookings:booking_list' %}" class="btn btn-link text-muted small">Clear</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <!-- TABLE -->
+    {% if bookings %}
+    <div class="card border-0 rounded-4 overflow-hidden shadow-sm">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-dark">
+                    <tr>
+                        <th class="ps-4">#</th>
+                        <th>Client</th>
+                        <th>Email / Phone</th>
+                        <th>Package</th>
+                        <th>Event Date</th>
+                        <th>Status</th>
+                        <th>Received</th>
+                        <th class="text-end pe-4">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for booking in bookings %}
+                    <tr>
+                        <td class="ps-4 text-muted small">{{ booking.pk }}</td>
+                        <td>
+                            <div class="fw-semibold">{{ booking.full_name }}</div>
+                            <div class="text-muted small">{{ booking.city }}</div>
+                        </td>
+                        <td>
+                            <div class="small">{{ booking.email }}</div>
+                            <div class="text-muted small">{{ booking.phone }}</div>
+                        </td>
+                        <td class="small">
+                            {% if booking.package %}
+                                {{ booking.package.name }}
+                                <div class="text-muted">€{{ booking.package.price }}</div>
+                            {% else %}
+                                <span class="text-muted">—</span>
+                            {% endif %}
+                        </td>
+                        <td class="small">{{ booking.event_date|date:"d M Y" }}</td>
+                        <td>
+                            {% if booking.status == 'confirmed' %}
+                                <span class="badge bg-success rounded-pill px-3">Confirmed</span>
+                            {% elif booking.status == 'cancelled' %}
+                                <span class="badge bg-danger rounded-pill px-3">Cancelled</span>
+                            {% else %}
+                                <span class="badge bg-warning text-dark rounded-pill px-3">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td class="text-muted small">{{ booking.created_at|date:"d M Y" }}</td>
+                        <td class="text-end pe-4">
+                            <div class="d-flex gap-2 justify-content-end">
+                                <a href="{% url 'bookings:booking_edit' booking.pk %}"
+                                   class="btn btn-sm btn-warning rounded-pill px-3 fw-semibold">
+                                    Edit
+                                </a>
+                                <a href="{% url 'bookings:booking_delete' booking.pk %}"
+                                   class="btn btn-sm btn-danger rounded-pill px-3 fw-semibold">
+                                    Delete
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <div class="display-4 mb-3">📭</div>
+        <p class="fw-semibold">No booking requests found.</p>
+        {% if search_query or current_status %}
+            <a href="{% url 'bookings:booking_list' %}" class="btn btn-outline-secondary rounded-pill mt-2">Clear filters</a>
+        {% endif %}
+    </div>
+    {% endif %}
+
+</div>
+{% endblock %}

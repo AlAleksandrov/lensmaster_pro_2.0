@@ -1,0 +1,128 @@
+{% extends 'base.html' %}
+
+{% load formatting %}
+
+{% block title %}{{ production.title }} - LensMaster Pro{% endblock %}
+
+{% block content %}
+
+<!-- BREADCRUMB -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a href="{% url 'productions:category_list' %}" class="text-decoration-none">Portfolio</a>
+        </li>
+        <li class="breadcrumb-item">
+            <a href="{% url 'productions:production_list_by_category' production.category.slug %}" class="text-decoration-none">
+                {{ production.category.name }}
+            </a>
+        </li>
+        <li class="breadcrumb-item active" aria-current="page">{{ production.title }}</li>
+    </ol>
+</nav>
+
+<!-- MAIN CONTENT -->
+<div class="row g-4 g-lg-5">
+
+    <!-- LEFT: IMAGE -->
+    <div class="col-lg-7">
+        {% if production.cover_image %}
+            <img src="{{ production.cover_image.url }}"
+                 class="img-fluid rounded-4 shadow"
+                 alt="{{ production.title }}">
+        {% else %}
+            <div class="lm-media-placeholder lm-img-h-400 rounded-4 shadow">
+                <span class="text-white opacity-50 fs-4">No Image Available</span>
+            </div>
+        {% endif %}
+    </div>
+
+    <!-- RIGHT: INFO -->
+    <div class="col-lg-5">
+        <div class="ps-lg-4">
+
+            <div class="mb-3 d-flex gap-2 flex-wrap">
+                <a href="{% url 'productions:production_edit' production.slug %}"
+                   class="btn btn-sm btn-warning text-dark px-3 lm-btn-action">
+                    Edit Project
+                </a>
+                <a href="{% url 'productions:production_delete' production.slug %}"
+                   class="btn btn-sm btn-danger px-3 lm-btn-action">
+                    Delete Project
+                </a>
+            </div>
+
+            <span class="badge text-bg-primary rounded-pill px-3 py-2 mb-2">{{ production.category.name }}</span>
+            <h1 class="display-5 fw-bold mb-3">{{ production.title }}</h1>
+
+            <div class="d-flex align-items-center text-muted mb-4 gap-3 flex-wrap">
+                <span>📍 {{ production.location }}</span>
+                <span>📅 {{ production.created_at|date:"F Y" }}</span>
+            </div>
+
+            <div class="mb-4">
+                <h5 class="fw-bold">About this project</h5>
+                <p class="text-secondary lh-lg mb-0">
+                    {{ production.description|linebreaks }}
+                </p>
+            </div>
+
+            <div class="card border-0 rounded-4 overflow-hidden">
+                <div class="p-4 lm-bg-cta">
+                    <h5 class="fw-bold mb-2">Interested in something similar?</h5>
+                    <p class="small text-muted mb-4">
+                        We can help you capture your special moments with the same professional touch.
+                    </p>
+                    <a href="{% url 'bookings:booking_request' %}" class="btn btn-success btn-lg rounded-pill w-100">
+                        Book a Session
+                    </a>
+                </div>
+            </div>
+            {% if production.equipment.all %}
+                <div class="equipment-used-section mt-4 pt-4 border-top border-secondary border-opacity-25">
+                    <h6 class="text-secondary small text-uppercase fw-bold mb-3">Gear used for this project:</h6>
+                    <div class="equipment-badges d-flex flex-wrap gap-2">
+                        {% for item in production.equipment.all %}
+                            <a href="{% url 'inventory:equipment_detail' item.pk %}"
+                               class="badge equipment-badge bg-dark border border-secondary px-3 py-2 rounded-pill text-decoration-none">
+                                <span class="text-secondary me-1">{{ item.get_equipment_type_display }}:</span>
+                                <span class="text-success">{{ item.brand }} {{ item.model }}</span>
+                            </a>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- RELATED PROJECTS -->
+{% if related_productions %}
+<section class="mt-5 pt-5 border-top">
+    <h3 class="fw-bold mb-4">More from {{ production.category.name }}</h3>
+    <div class="row g-4">
+        {% for related in related_productions %}
+        <div class="col-md-4">
+            <div class="card h-100 border-0 rounded-4 overflow-hidden lm-card-hover">
+                {% if related.cover_image %}
+                    <img src="{{ related.cover_image.url }}"
+                         class="card-img-top lm-img-h-150 lm-img-cover"
+                         alt="{{ related.title }}">
+                {% else %}
+                    <div class="lm-media-placeholder lm-img-h-150">
+                        <span class="text-white opacity-50 small">No Image</span>
+                    </div>
+                {% endif %}
+                <div class="card-body p-4">
+                    <h6 class="fw-bold mb-1">{{ related.title }}</h6>
+                    <p class="text-muted small mb-0">📍 {{ related.location }}</p>
+                    <a href="{% url 'productions:production_detail' related.slug %}" class="stretched-link"></a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+{% endif %}
+
+{% endblock %}

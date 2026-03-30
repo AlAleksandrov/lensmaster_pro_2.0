@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Booking #{{ object.pk }} - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+    <div class="col-md-10 col-lg-8">
+        <div class="card border-0 rounded-4 overflow-hidden shadow">
+            <div class="row g-0">
+
+                <!-- LEFT PANEL -->
+                <div class="col-md-4 p-4 p-md-5 d-flex flex-column justify-content-center lm-bg-panel">
+                    <h2 class="h4 fw-bold mb-2">Edit Booking</h2>
+                    <p class="text-muted small mb-4">Update the status and internal notes for this booking request.</p>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2">✅ Change status</li>
+                        <li class="mb-2">✅ Update package</li>
+                        <li class="mb-2">✅ Adjust event date</li>
+                        <li class="mb-2">✅ Add internal notes</li>
+                    </ul>
+                </div>
+
+                <!-- RIGHT: FORM -->
+                <div class="col-md-8 bg-white p-4 p-md-5">
+
+                    <!-- CLIENT INFO -->
+                    <div class="p-3 rounded-4 bg-light mb-4">
+                        <p class="fw-bold mb-1">{{ object.full_name }}</p>
+                        <p class="text-muted small mb-1">{{ object.email }} · {{ object.phone }}</p>
+                        <p class="text-muted small mb-0">{{ object.city }} · Heard from: {{ object.get_heard_from_display }}</p>
+                        {% if object.message %}
+                        <hr class="my-2">
+                        <p class="small text-muted mb-0"><em>"{{ object.message }}"</em></p>
+                        {% endif %}
+                    </div>
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Status</label>
+                                <select name="status" class="form-select">
+                                    {% for value, label in object.Status.choices %}
+                                        <option value="{{ value }}" {% if object.status == value %}selected{% endif %}>{{ label }}</option>
+                                    {% endfor %}
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Event Date</label>
+                                {{ form.event_date }}
+                            </div>
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Package</label>
+                            {{ form.package }}
+                        </div>
+
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Internal Notes</label>
+                            {{ form.internal_notes }}
+                            <div class="form-text lm-text-xs">Visible only to studio staff.</div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center pt-3 border-top">
+                            <a href="{% url 'bookings:booking_list' %}" class="text-muted text-decoration-none small">
+                                ← Back to Bookings
+                            </a>
+                            <button type="submit" class="btn btn-success rounded-pill px-5 fw-bold">
+                                Save Changes
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

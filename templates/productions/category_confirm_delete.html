@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Category - LensMaster Pro{% endblock %}
+
+{% block content %}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+
+        <nav aria-label="breadcrumb" class="mb-4">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item">
+                    <a href="{% url 'productions:category_list' %}" class="text-decoration-none">Portfolio</a>
+                </li>
+                <li class="breadcrumb-item active">Delete Category</li>
+            </ol>
+        </nav>
+
+        <div class="card border-danger rounded-4 p-4">
+            <h2 class="fw-bold text-danger mb-3">Delete "{{ object.name }}"?</h2>
+            <p class="text-muted mb-1">
+                This action <strong>cannot be undone</strong>. The category will be permanently removed.
+            </p>
+            {% with count=object.productions.count %}
+            {% if count %}
+            <div class="alert alert-warning rounded-3 mt-3">
+                ⚠️ This category contains <strong>{{ count }} production{{ count|pluralize }}</strong>.
+                Deleting it may affect related records.
+            </div>
+            {% endif %}
+            {% endwith %}
+
+            <form method="post" class="mt-4 d-flex gap-2">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger rounded-pill px-4">Yes, Delete</button>
+                <a href="{% url 'productions:category_list' %}" class="btn btn-outline-secondary rounded-pill px-4">
+                    Cancel
+                </a>
+            </form>
+        </div>
+
+    </div>
+</div>
+
+{% endblock %}

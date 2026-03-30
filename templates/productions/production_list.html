@@ -1,0 +1,102 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ category.name }} - LensMaster Pro{% endblock %}
+
+{% block content %}
+
+<!-- BREADCRUMB -->
+<nav aria-label="breadcrumb" class="mb-4">
+    <ol class="breadcrumb mb-0">
+        <li class="breadcrumb-item">
+            <a href="{% url 'productions:category_list' %}" class="text-decoration-none">Portfolio</a>
+        </li>
+        <li class="breadcrumb-item active">{{ category.name }}</li>
+    </ol>
+</nav>
+
+<!-- PAGE HEADER -->
+<div class="mb-5">
+    <div class="d-flex align-items-center justify-content-between gap-3 mb-2">
+        <div class="d-flex align-items-center gap-3">
+            {% if category.cover_image %}
+                <img src="{{ category.cover_image.url }}" class="rounded-circle lm-img-circle-56">
+            {% endif %}
+            <div class="min-w-0">
+                <h1 class="fw-bold mb-0">{{ category.name }}</h1>
+                <div class="text-muted small">{{ productions|length }} project{{ productions|length|pluralize }}</div>
+            </div>
+        </div>
+        <div class="d-flex gap-2">
+          <a href="{% url 'productions:category_edit' category.slug %}"
+             class="btn btn-warning rounded-pill px-4 text-nowrap">
+            Edit Category
+          </a>
+
+          <a href="{% url 'productions:production_create' %}"
+             class="btn btn-success rounded-pill px-4 text-nowrap">
+            + Add New Production
+          </a>
+        </div>
+    </div>
+    {% if category.description %}
+        <p class="text-muted lead mb-3">{{ category.description }}</p>
+    {% endif %}
+    <hr>
+</div>
+<form method="get" class="d-flex gap-2 mb-4">
+    <input type="text" name="q" value="{{ search_query }}"
+           class="form-control rounded-pill" placeholder="Search in this category...">
+    <button type="submit" class="btn btn-success rounded-pill px-4">Search</button>
+    {% if search_query %}
+        <a href="." class="btn btn-outline-secondary rounded-pill">Clear</a>
+    {% endif %}
+</form>
+
+<!-- PRODUCTIONS GRID -->
+<div class="row g-4">
+    {% for production in productions %}
+    <div class="col-sm-6 col-md-4 col-lg-3">
+        <div class="card h-100 border-0 rounded-4 overflow-hidden lm-card-hover">
+            {% if production.cover_image %}
+                <img src="{{ production.cover_image.url }}" class="card-img-top lm-img-h-180 lm-img-cover">
+            {% else %}
+                <div class="lm-media-placeholder lm-img-h-180">
+                    <span class="text-white opacity-50">No Image</span>
+                </div>
+            {% endif %}
+            <div class="card-body p-4">
+                <h6 class="card-title fw-bold mb-1">{{ production.title }}</h6>
+                <p class="text-muted small mb-2">📍 {{ production.location }}</p>
+                {% if production.short_description %}
+                    <p class="card-text small text-muted mb-0">
+                    {{ production.short_description|truncatewords:12 }}
+                    </p>
+                {% endif %}
+            </div>
+            <div class="card-footer bg-white border-0 p-4 pt-0">
+                {% if production.slug %}
+                    <a href="{% url 'productions:production_detail' production.slug %}"
+                    class="btn btn-sm btn-outline-dark w-100 rounded-pill">
+                    View Project →
+                    </a>
+                {% else %}
+                    <button class="btn btn-sm btn-outline-secondary w-100 rounded-pill" disabled>
+                    No details available
+                    </button>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    {% empty %}
+    <div class="col-12 text-center py-5 text-muted">
+        <h4 class="fw-bold mb-2">No projects in this category yet.</h4>
+        <p class="mb-4">Check back soon or explore other categories.</p>
+        <a href="{% url 'productions:category_list' %}" class="btn btn-outline-dark rounded-pill px-4">
+            ← Back to Portfolio
+        </a>
+    </div>
+    {% endfor %}
+</div>
+
+{% endblock %}

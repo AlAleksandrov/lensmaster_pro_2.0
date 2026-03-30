@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {% if object %}Edit Package - LensMaster Pro
+    {% else %}Add New Package - LensMaster Pro
+    {% endif %}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+    <div class="col-md-10 col-lg-9">
+        <div class="card border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+
+                <!-- LEFT SIDE: INFO PANEL -->
+                <div class="col-md-4 p-4 p-md-5 border-end lm-bg-panel">
+                    {% if object %}
+                        <h2 class="h4 fw-bold mb-2">Edit Package</h2>
+                        <p class="text-muted mb-4 small">
+                            Update the details and pricing for this service package.
+                        </p>
+                    {% else %}
+                        <h2 class="h4 fw-bold mb-2">New Package</h2>
+                        <p class="text-muted mb-4 small">
+                            Create a new service package and assign it to a category with a price.
+                        </p>
+                    {% endif %}
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2">✅ Package name & Category</li>
+                        <li class="mb-2">✅ Price & Duration</li>
+                        <li class="mb-2">✅ Number of edited photos</li>
+                        <li class="mb-2">✅ Description</li>
+                        <li class="mb-2">✅ Active / Inactive status</li>
+                    </ul>
+                </div>
+
+                <!-- RIGHT SIDE: FORM -->
+                <div class="col-md-8 bg-white p-4 p-md-5">
+
+                    <!-- ERROR MESSAGES -->
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-4 small mb-4">
+                        <p class="fw-bold mb-2">Please correct the following:</p>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+
+                        <!-- ROW 1: NAME & CATEGORY -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-7">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Package Name</label>
+                                {{ form.name }}
+                            </div>
+                            <div class="col-md-5">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Category</label>
+                                {{ form.category }}
+                            </div>
+                        </div>
+
+                        <!-- ROW 2: PRICE & DURATION -->
+                        <div class="row g-3 mb-4">
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Price (€)</label>
+                                {{ form.price }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Duration (hours)</label>
+                                {{ form.duration_hours }}
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold small text-uppercase text-muted">Edited Photos</label>
+                                {{ form.max_photos_included }}
+                            </div>
+                        </div>
+
+                        <!-- DESCRIPTION -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold small text-uppercase text-muted">Description</label>
+                            {{ form.description }}
+                            <div class="form-text lm-text-xs">
+                                What is included in this package? (e.g. drone footage, same-day edit, etc.)
+                            </div>
+                        </div>
+
+                        <!-- ACTIVE STATUS -->
+                        <div class="mb-4 p-3 border rounded-4 bg-light">
+                            <div class="form-check">
+                                {{ form.is_active }}
+                                <label class="form-check-label ms-2 small fw-semibold text-uppercase text-muted">
+                                    Active (visible to clients)
+                                </label>
+                            </div>
+                            <div class="form-text mt-1 lm-text-xs">
+                                Inactive packages are hidden from the public pricing page.
+                            </div>
+                        </div>
+
+                        <!-- BUTTONS -->
+                        <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mt-4 pt-3 border-top">
+                            <a href="{% url 'bookings:package_list' %}" class="text-muted text-decoration-none small">
+                                ← Back to Packages
+                            </a>
+                            <button type="submit" class="btn btn-success btn-lg px-5 rounded-pill fw-bold">
+                                {% if object %}Save Changes{% else %}Create Package{% endif %}
+                            </button>
+                        </div>
+
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

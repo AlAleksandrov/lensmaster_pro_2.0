@@ -1,0 +1,108 @@
+{% extends 'base.html' %}
+
+{% block title %}{{ item.brand }} {{ item.model }} - Details{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a href="{% url 'inventory:equipment_list' %}" class="text-success text-decoration-none">Inventory</a></li>
+            <li class="breadcrumb-item active text-secondary" aria-current="page">{{ item.model }}</li>
+        </ol>
+    </nav>
+
+    <div class="row g-5">
+
+        <div class="col-lg-5">
+            <div class="card bg-dark text-white border-secondary rounded-4 p-4 shadow-lg">
+
+                <div class="mb-4 rounded-3 overflow-hidden border border-secondary border-opacity-25 shadow-sm bg-black bg-opacity-25">
+                    {% if item.cover_image %}
+                        <img src="{{ item.cover_image.url }}"
+                             class="img-fluid w-100"
+                             style="max-height: 400px; object-fit: cover;"
+                             alt="{{ item.brand }} {{ item.model }}">
+                    {% else %}
+                        <div class="d-flex align-items-center justify-content-center" style="height: 250px;">
+                            <div class="text-center opacity-25">
+                                <i class="bi bi-camera fs-1 d-block mb-2"></i>
+                                <span class="small">No image available</span>
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+
+                <span class="badge bg-secondary align-self-start mb-3">{{ item.get_equipment_type_display }}</span>
+                <h1 class="display-6 fw-bold mb-1">{{ item.brand }}</h1>
+                <p class="text-secondary fs-5 mb-4">Model: {{ item.model }}</p>
+
+                <div class="bg-black bg-opacity-25 rounded-3 p-3 mb-4 border border-secondary border-opacity-25">
+                    <div class="small mb-2">
+                        <span class="text-secondary">Internal ID:</span>
+                        <code class="text-success ms-2">{{ item.internal_id }}</code>
+                    </div>
+                    <div class="small">
+                        <span class="text-secondary">Status:</span>
+                        <span class="ms-2 {% if item.is_active %}text-info{% else %}text-danger{% endif %}">
+                            {% if item.is_active %}● Active{% else %}○ Inactive{% endif %}
+                        </span>
+                    </div>
+                </div>
+
+                {% if item.notes %}
+                <h6 class="text-white fw-bold mb-2">Technical Notes:</h6>
+                <p class="text-secondary small">{{ item.notes }}</p>
+                {% endif %}
+
+                <div class="d-flex flex-column gap-2 mt-3">
+                    <a href="{% url 'inventory:equipment_edit' item.pk %}" class="btn btn-warning rounded-pill fw-bold">
+                        Edit Equipment
+                    </a>
+                    <a href="{% url 'inventory:equipment_delete' item.pk %}" class="btn btn-danger rounded-pill fw-bold">
+                        Delete Equipment
+                    </a>
+                    <a href="{% url 'inventory:equipment_list' %}" class="btn btn-outline-light rounded-pill">
+                        ← Back to Inventory
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <h3 class="text-white fw-bold mb-4">Used in Productions</h3>
+
+            {% if productions %}
+            <div class="row g-3">
+                {% for prod in productions %}
+                <div class="col-12">
+                    <div class="card bg-dark border-secondary rounded-4 transition-hover">
+                        <div class="card-body d-flex align-items-center p-3">
+                            {% if prod.cover_image %}
+                            <div class="me-3 rounded-2 overflow-hidden" style="width: 60px; height: 60px;">
+                                <img src="{{ prod.cover_image.url }}" class="w-100 h-100" style="object-fit: cover;">
+                            </div>
+                            {% endif %}
+
+                            <div class="flex-grow-1">
+                                <h5 class="mb-1">
+                                    <a href="{% url 'productions:production_detail' prod.slug %}" class="text-white text-decoration-none stretched-link">
+                                        {{ prod.title }}
+                                    </a>
+                                </h5>
+                                <p class="text-secondary small mb-0">{{ prod.category.name }} • {{ prod.created_at|date:"F Y" }}</p>
+                            </div>
+                            <div class="text-success">View Project →</div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div class="text-center py-5 border border-secondary border-dashed rounded-4">
+                <p class="text-secondary mb-0">This equipment hasn't been linked to any productions yet.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

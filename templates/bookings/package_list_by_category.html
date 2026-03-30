@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+{% load formatting %}
+
+{% block title %}{{ current_category }} Packages - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="py-4 py-lg-5">
+
+    <nav aria-label="breadcrumb" class="mb-4">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item">
+                <a href="{% url 'bookings:package_list' %}" class="text-decoration-none">All Packages</a>
+            </li>
+            <li class="breadcrumb-item active text-white">{{ current_category }}</li>
+        </ol>
+    </nav>
+
+    <div class="mb-5">
+        <h1 class="display-5 fw-bold text-white mb-1">{{ current_category }}</h1>
+        <p class="text-secondary">{{ packages|length }} package{{ packages|length|pluralize }} available</p>
+    </div>
+
+    <div class="row g-4">
+        {% for package in packages %}
+        <div class="col-sm-6 col-lg-4">
+            <div class="card h-100 rounded-4 overflow-hidden lm-card-hover">
+                <div class="card-body p-4">
+
+                    <!-- PACKAGE NAME & PRICE -->
+                    <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
+                        <div class="min-w-0 flex-grow-1 overflow-hidden">
+                            <h3 class="h5 fw-bold mb-1">
+                                <a href="{% url 'bookings:package_detail' package.pk %}"
+                                   class="text-decoration-none text-dark"
+                                   style="display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"
+                                   title="{{ package.name }}">
+                                    {{ package.name }}
+                                </a>
+                            </h3>
+                            {% if package.description %}
+                            <p class="text-muted small mb-0">
+                                {{ package.description|truncatewords:18 }}
+                            </p>
+                            {% endif %}
+                        </div>
+
+                        <span class="badge text-bg-success rounded-pill px-3 py-2 flex-shrink-0">
+                            {{ package.price|eur }}
+                        </span>
+                    </div>
+
+                    <!-- DETAILS -->
+                    <div class="row g-2">
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 bg-light h-100">
+                                <div class="text-muted small text-uppercase fw-bold mb-1">Duration</div>
+                                <div class="fw-bold">{{ package.duration_hours|hours_label }}</div>
+                            </div>
+                        </div>
+                        <div class="col-6">
+                            <div class="border rounded-4 p-3 bg-light h-100">
+                                <div class="text-muted small text-uppercase fw-bold mb-1">Edited photos</div>
+                                <div class="fw-bold">{{ package.max_photos_included }}</div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- CARD FOOTER -->
+                <div class="card-footer bg-white border-0 p-4 pt-0">
+                    <div class="d-flex flex-wrap gap-2">
+                        <a href="{% url 'bookings:booking_request' %}?package={{ package.pk }}"
+                           class="btn btn-success btn-sm rounded-pill px-3">
+                            Book Now →
+                        </a>
+                        <a href="{% url 'bookings:package_edit' package.pk %}"
+                           class="btn btn-warning btn-sm text-dark px-3 lm-btn-action">
+                            Edit
+                        </a>
+                        <a href="{% url 'bookings:package_delete' package.pk %}"
+                           class="btn btn-danger btn-sm px-3 lm-btn-action">
+                            Delete
+                        </a>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        {% empty %}
+        <div class="text-center py-5 border border-secondary border-dashed rounded-4 w-100">
+            <p class="text-muted mb-0">No packages found in this category.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+</div>
+{% endblock %}

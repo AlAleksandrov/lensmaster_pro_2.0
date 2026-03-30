@@ -1,0 +1,57 @@
+{% extends 'base.html' %}
+
+{% block title %}Delete Equipment - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-5">
+    <div class="col-md-6 col-lg-5">
+        <div class="card border-0 rounded-4 overflow-hidden shadow-lg">
+            <div class="row g-0">
+
+                <div class="col-12 p-4 p-md-5 bg-white">
+                    <nav aria-label="breadcrumb" class="mb-4">
+                        <ol class="breadcrumb mb-0">
+                            <li class="breadcrumb-item">
+                                <a href="{% url 'inventory:equipment_list' %}" class="text-decoration-none text-muted">Inventory</a>
+                            </li>
+                            <li class="breadcrumb-item active">Delete</li>
+                        </ol>
+                    </nav>
+
+                    <div class="text-center mb-4">
+                        <div class="display-4 mb-3">🗑️</div>
+                        <h2 class="fw-bold">Delete Equipment?</h2>
+                        <p class="text-muted">
+                            You are about to permanently delete
+                            <strong>{{ object.brand }} {{ object.model }}</strong>
+                            <code class="text-danger small">({{ object.internal_id }})</code>.
+                        </p>
+                        <p class="text-danger small fw-semibold">This action cannot be undone.</p>
+                    </div>
+
+                    {% with count=object.productions.count %}
+                    {% if count %}
+                    <div class="alert alert-warning rounded-3 small mb-4">
+                        ⚠️ This item is linked to <strong>{{ count }} production{{ count|pluralize }}</strong>.
+                        Removing it will unlink it from those records.
+                    </div>
+                    {% endif %}
+                    {% endwith %}
+
+                    <form method="post" class="d-flex gap-3 justify-content-center">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger rounded-pill px-5 fw-bold">
+                            Yes, Delete
+                        </button>
+                        <a href="{% url 'inventory:equipment_detail' object.pk %}"
+                           class="btn btn-outline-secondary rounded-pill px-4">
+                            Cancel
+                        </a>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

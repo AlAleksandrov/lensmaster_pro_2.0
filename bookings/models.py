@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.db import models
-from common.models import DescriptionMixin, ActiveStatusMixin, TimestampedMixin
+from common.models import DescriptionMixin, ActiveStatusMixin, TimestampedMixin, ContactInfoMixin
 
 
 # Create your models here.
@@ -38,7 +39,7 @@ class ServicePackage(DescriptionMixin, ActiveStatusMixin, models.Model):
         return f'{self.name} - €{self.price} per {self.duration_hours} hours'
 
 
-class BookingRequest(TimestampedMixin, models.Model):
+class BookingRequest(TimestampedMixin, ContactInfoMixin, models.Model):
 
     class Status(models.TextChoices):
         PENDING = 'pending', 'Pending'
@@ -52,6 +53,14 @@ class BookingRequest(TimestampedMixin, models.Model):
         FRIEND = 'friend', 'Friend referral'
         OTHER = 'other', 'Other'
 
+    user = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name='bookings',
+    )
+
     first_name = models.CharField(
         max_length=50,
     )
@@ -61,16 +70,6 @@ class BookingRequest(TimestampedMixin, models.Model):
     )
 
     email = models.EmailField()
-
-    phone = models.CharField(
-        max_length=30,
-        blank=True,
-    )
-
-    city = models.CharField(
-        max_length=100,
-        blank=True,
-    )
 
     event_date = models.DateField()
 

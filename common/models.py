@@ -50,3 +50,21 @@ class ActiveStatusMixin(models.Model):
 
     class Meta:
         abstract = True
+
+
+class ContactInfoMixin(models.Model):
+    phone = models.CharField(
+        max_length=30,
+        blank=True,
+        null=True,
+        help_text='Phone number for contact purposes',
+    )
+    city = models.CharField(
+        max_length=100,
+        blank=True,
+        null=True,
+        help_text='City for contact purposes',
+    )
+
+    class Meta:
+        abstract = True

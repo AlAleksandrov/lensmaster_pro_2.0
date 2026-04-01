@@ -37,7 +37,7 @@ ALLOWED_HOSTS.extend([
     "127.0.0.1",
     "localhost",
     "rosella-unshotted-adjustably.ngrok-free.dev",
-    'lensmaster-pro.onrender.com',
+    'lensmaster-pro-2-0.onrender.com/',
     'lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
     'lensmasterpro.azurewebsites.net',
     '0.0.0.0',
@@ -47,19 +47,18 @@ for i in range(256):
     ALLOWED_HOSTS.append(f'169.254.130.{i}')
 
 CSRF_TRUSTED_ORIGINS = ([
-    "http://127.0.0.1",
-    "http://localhost",
-    "https://rosella-unshotted-adjustably.ngrok-free.dev",
-    'https://lensmaster-pro.onrender.com',
-    'https://lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
-    'https://lensmasterpro.azurewebsites.net',
-])
+        "http://127.0.0.1",
+        "http://localhost",
+        "https://rosella-unshotted-adjustably.ngrok-free.dev",
+        'https://lensmaster-pro-2-0.onrender.com',
+        'https://lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
+        'https://lensmasterpro.azurewebsites.net',
+    ])
 
 # Application definition
 
 PROJECT_APPS = [
-    'crispy_forms',
-    'crispy_bootstrap5',
+    'accounts',
     'bookings',
     'common',
     'inventory',
@@ -76,6 +75,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'cloudinary_storage',
     'cloudinary',
+    'crispy_forms',
+    'crispy_bootstrap5',
 ] + PROJECT_APPS
 
 MIDDLEWARE = [
@@ -171,6 +172,10 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+# Redirect след login/logout
+LOGIN_URL = 'accounts:login'
+LOGIN_REDIRECT_URL = 'home'
+LOGOUT_REDIRECT_URL = 'home'
 
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/

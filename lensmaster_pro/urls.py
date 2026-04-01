@@ -23,6 +23,7 @@ from common.views import HomeView, custom_404_view
 handler404 = custom_404_view
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
+    path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),
     path('admin/', admin.site.urls),
     path('bookings/', include(('bookings.urls', 'bookings'), namespace='bookings')),
     path('portfolio/', include(('productions.urls', 'productions'), namespace='productions')),

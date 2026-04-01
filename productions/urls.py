@@ -5,6 +5,7 @@ app_name = 'productions'
 
 productions_patterns = [
     path('', views.ProductionDetailView.as_view(), name='production_detail'),
+    path('favorite/', views.ToggleFavoriteView.as_view(), name='toggle_favorite'),
     path('edit/', views.ProductionUpdateView.as_view(), name='production_edit'),
     path('delete/', views.ProductionDeleteView.as_view(), name='production_delete'),
 ]

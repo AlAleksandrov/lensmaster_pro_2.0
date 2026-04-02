@@ -55,6 +55,14 @@ CSRF_TRUSTED_ORIGINS = ([
         'https://lensmasterpro.azurewebsites.net',
     ])
 
+# ───── CORS ─────
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000",
+    "http://127.0.0.1:3000",
+    "https://lensmaster-pro-2-0.onrender.com",
+]
+CORS_ALLOW_CREDENTIALS = True
+
 # Application definition
 
 PROJECT_APPS = [
@@ -77,11 +85,19 @@ INSTALLED_APPS = [
     'cloudinary',
     'crispy_forms',
     'crispy_bootstrap5',
+    'django_q',
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'rest_framework_simplejwt.token_blacklist',
+    'drf_spectacular',
+    'corsheaders',
+    'django_filters',
 ] + PROJECT_APPS
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
+    'corsheaders.middleware.CorsMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -153,6 +169,29 @@ else:
             "PORT": os.getenv("DB_PORT"),
         }
     }
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticatedOrReadOnly',
+    ),
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+        'rest_framework.authentication.SessionAuthentication',
+    ],
+    'DEFAULT_FILTER_BACKENDS': [
+        'django_filters.rest_framework.DjangoFilterBackend',
+        'rest_framework.filters.SearchFilter',
+        'rest_framework.filters.OrderingFilter',
+    ],
+}
+
+SPECTACULAR_SETTINGS = {
+    'TITLE': 'LensMaster Pro API',
+    'DESCRIPTION': 'Best LensMaster Pro app out',
+    'VERSION': '1.0.0',
+}
+
 
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
@@ -234,6 +273,18 @@ MEDIA_ROOT = BASE_DIR / "media"
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
+Q_CLUSTER = {
+    'name': 'lensmaster',
+    'workers': 4,
+    'timeout': 60,
+    'retry': 90,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',
+}
+
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
+DEFAULT_FROM_EMAIL = 'noreply@lensmaster.com'
 
 # Security settings (for production)
 if not DEBUG:

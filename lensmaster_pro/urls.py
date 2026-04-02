@@ -14,10 +14,13 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
+
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
 from django.urls import path, include
+from drf_spectacular.views import SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
+from rest_framework_simplejwt import views
 from common.views import HomeView, custom_404_view
 
 handler404 = custom_404_view
@@ -28,7 +31,13 @@ urlpatterns = [
     path('bookings/', include(('bookings.urls', 'bookings'), namespace='bookings')),
     path('portfolio/', include(('productions.urls', 'productions'), namespace='productions')),
     path('inventory/', include(('inventory.urls', "inventory"), namespace="inventory")),
-
+    path('api/bookings/', include('bookings.urls_api')),
+    path('api/token/', views.TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    path('api/token/refresh/', views.TokenRefreshView.as_view(), name='token_refresh'),
+    path('api/token/verify/', views.TokenVerifyView.as_view(), name='token_verify'),
+    path('api/schema/', SpectacularAPIView.as_view(), name='schema'),
+    path('api/schema/swagger-ui/', SpectacularSwaggerView.as_view(url_name='schema'), name='swagger-ui'),
+    path('api/schema/redoc/', SpectacularRedocView.as_view(url_name='schema'), name='redoc'),
 ]
 
 if settings.DEBUG:

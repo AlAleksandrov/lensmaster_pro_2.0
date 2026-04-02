@@ -1,6 +1,6 @@
 from django.urls import path, include
 from django.views.generic import TemplateView
-from bookings import views, api_views
+from bookings import views
 
 app_name = 'bookings'
 
@@ -17,13 +17,6 @@ service_package_patterns = [
 ]
 
 urlpatterns = [
-    path('api/', include([
-        path('requests/', api_views.BookingRequestCreateAPIView.as_view(), name='api_booking_request'),
-        path('packages/', include([
-            path('', api_views.ServicePackageListAPIView.as_view(), name='api_package_list'),
-            path('<int:pk>/', api_views.ServicePackageDetailAPIView.as_view(), name='api_package_detail'),
-        ])),
-    ])),
     path('package/<int:pk>/favorite/', views.ToggleFavoritePackageView.as_view(), name='toggle_favorite_package'),
     path('request/', views.BookingCreateView.as_view(), name='booking_request'),
     path('success/', TemplateView.as_view(template_name='bookings/booking_success.html'), name='booking_success'),

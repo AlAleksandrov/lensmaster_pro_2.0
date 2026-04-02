@@ -1,5 +1,4 @@
 from django.core.mail import send_mail
-
 from lensmaster_pro.settings import DEFAULT_FROM_EMAIL
 
 

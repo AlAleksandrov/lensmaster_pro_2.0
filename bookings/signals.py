@@ -1,8 +1,6 @@
 import threading
-
 from django.db.models.signals import pre_save
 from django.dispatch import receiver
-from django_q.tasks import async_task
 from bookings.models import BookingRequest
 from bookings.tasks import send_booking_confirmed_email
 

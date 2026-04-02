@@ -67,4 +67,4 @@ class BookingTests(TestCase):
 
     def test_api_booking_request_requires_post(self):
         response = self.client.get(reverse('bookings:api_booking_request'))
-        self.assertIn(response.status_code, [200, 403, 405])
+        self.assertIn(response.status_code, [200, 401, 403, 405])

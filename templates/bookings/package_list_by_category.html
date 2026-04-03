@@ -74,14 +74,16 @@
                            class="btn btn-success btn-sm rounded-pill px-3">
                             Book Now →
                         </a>
-                        <a href="{% url 'bookings:package_edit' package.pk %}"
-                           class="btn btn-warning btn-sm text-dark px-3 lm-btn-action">
-                            Edit
-                        </a>
-                        <a href="{% url 'bookings:package_delete' package.pk %}"
-                           class="btn btn-danger btn-sm px-3 lm-btn-action">
-                            Delete
-                        </a>
+                        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+                            <a href="{% url 'bookings:package_edit' package.pk %}"
+                               class="btn btn-warning btn-sm text-dark px-3 lm-btn-action">
+                                Edit
+                            </a>
+                            <a href="{% url 'bookings:package_delete' package.pk %}"
+                               class="btn btn-danger btn-sm px-3 lm-btn-action">
+                                Delete
+                            </a>
+                        {% endif %}
                     </div>
                 </div>
 

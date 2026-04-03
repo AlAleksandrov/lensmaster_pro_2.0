@@ -18,38 +18,79 @@
 <body>
 
     <!-- Navigation -->
-    <nav class="navbar navbar-expand-lg sticky-top mb-4">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
         <div class="container">
-            <a class="navbar-brand fw-bold" href="{% url 'home' %}">LENSMASTER PRO</a>
+            <a class="navbar-brand fw-bold" href="{% url 'home' %}">
+                <span class="text-success">Lens</span>Master Pro
+            </a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
             <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto align-items-center">
+                <ul class="navbar-nav me-auto">
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' and request.resolver_match.app_name == '' %}active{% endif %}"
-                           href="{% url 'home' %}">Home</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'productions' %}active{% endif %}"
-                           href="{% url 'productions:category_list' %}">Portfolio</a>
+                        <a class="nav-link" href="{% url 'productions:category_list' %}">Portfolio</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'inventory' %}active{% endif %}"
-                           href="{% url 'inventory:equipment_list' %}">Our Gear</a>
+                        <a class="nav-link" href="{% url 'bookings:package_list' %}">Packages</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'bookings' and 'package' in request.resolver_match.url_name %}active{% endif %}"
-                           href="{% url 'bookings:package_list' %}">Packages</a>
+                        <a class="nav-link" href="{% url 'inventory:equipment_list' %}">Inventory</a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.app_name == 'bookings' and 'booking' in request.resolver_match.url_name %}active{% endif %}"
-                           href="{% url 'bookings:booking_list' %}">Bookings</a>
+                        <a class="nav-link" href="{% url 'bookings:booking_request' %}">Book Now</a>
                     </li>
-                    <li class="nav-item ms-lg-3">
-                        <a class="btn btn-success rounded-pill px-4 fw-semibold"
-                           href="{% url 'bookings:booking_request' %}">Book Now</a>
-                    </li>
+
+
+                    <!-- STAFF ONLY SECTION -->
+                    {% if request.user.is_authenticated %}
+                        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-warning" href="#" id="adminDropdown" role="button" data-bs-toggle="dropdown">
+                                Management
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-dark">
+                                <li><a class="dropdown-item fw-bold text-success" href="{% url 'accounts:stats' %}">📊 Studio Statistics</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'bookings:booking_list' %}">📅 All Bookings</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'productions:category_create' %}">+ Add Category</a></li>
+                                <li><a class="dropdown-item" href="{% url 'productions:production_create' %}">+ Add Production</a></li>
+                                <li><a class="dropdown-item" href="{% url 'bookings:package_create' %}">+ Add Package</a></li>
+                                <li><a class="dropdown-item" href="{% url 'inventory:equipment_create' %}">+ Add Equipment</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                            </ul>
+                        </li>
+                        {% endif %}
+                    {% endif %}
+                </ul>
+
+                <ul class="navbar-nav ms-auto">
+                    {% if request.user.is_authenticated %}
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle active" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                                Hi, {{ request.user.first_name|default:request.user.username }}
+                            </a>
+                            <ul class="dropdown-menu dropdown-menu-end dropdown-menu-dark">
+                                <li><a class="dropdown-item" href="{% url 'accounts:profile_detail' %}">👤 My Profile</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <form action="{% url 'accounts:logout' %}" method="post" class="d-inline">
+                                        {% csrf_token %}
+                                        <button type="submit" class="dropdown-item text-danger">Logout</button>
+                                    </form>
+                                </li>
+                            </ul>
+                        </li>
+                    {% else %}
+                        <li class="nav-item">
+                            <a class="nav-link" href="{% url 'accounts:login' %}">Login</a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link btn btn-success btn-sm text-white px-3 ms-lg-2 rounded-pill" href="{% url 'accounts:register' %}">Register</a>
+                        </li>
+                    {% endif %}
                 </ul>
             </div>
         </div>

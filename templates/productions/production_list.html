@@ -26,17 +26,24 @@
                 <div class="text-muted small">{{ productions|length }} project{{ productions|length|pluralize }}</div>
             </div>
         </div>
-        <div class="d-flex gap-2">
-          <a href="{% url 'productions:category_edit' category.slug %}"
-             class="btn btn-warning rounded-pill px-4 text-nowrap">
-            Edit Category
-          </a>
+        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+            <div class="d-flex gap-2">
+              <a href="{% url 'productions:category_edit' category.slug %}"
+                 class="btn btn-warning rounded-pill px-4 text-nowrap">
+                Edit Category
+              </a>
 
-          <a href="{% url 'productions:production_create' %}"
-             class="btn btn-success rounded-pill px-4 text-nowrap">
-            + Add New Production
-          </a>
-        </div>
+              <a href="{% url 'productions:category_delete' category.slug %}"
+                 class="btn btn-danger rounded-pill px-4 text-nowrap">
+                Delete Category
+              </a>
+              
+              <a href="{% url 'productions:production_create' %}"
+                 class="btn btn-success rounded-pill px-4 text-nowrap">
+                + Add New Production
+              </a>
+            </div>
+        {% endif %}
     </div>
     {% if category.description %}
         <p class="text-muted lead mb-3">{{ category.description }}</p>

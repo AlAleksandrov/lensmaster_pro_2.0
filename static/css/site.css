@@ -221,3 +221,47 @@ h5 a .badge {
 .lm-bg-panel .text-muted {
     color: #9ca3af !important;
 }
+
+.form-control,
+.form-select,
+textarea.form-control {
+    background-color: #1e1e2e !important;
+    color: #ffffff !important;
+    border-color: #444 !important;
+}
+
+/* Placeholder text */
+.form-control::placeholder,
+textarea.form-control::placeholder {
+    color: #888 !important;
+}
+
+/* Focus */
+.form-control:focus,
+.form-select:focus {
+    background-color: #1e1e2e !important;
+    color: #ffffff !important;
+    border-color: #28a745 !important;
+    box-shadow: 0 0 0 0.2rem rgba(40, 167, 69, 0.25) !important;
+}
+
+/* Select dropdown options */
+.form-select option {
+    background-color: #1e1e2e;
+    color: #ffffff;
+}
+
+/* Date/time inputs */
+input[type="date"],
+input[type="time"],
+input[type="datetime-local"] {
+    background-color: #1e1e2e !important;
+    color: #ffffff !important;
+    border-color: #444 !important;
+}
+
+/* Color scheme for date picker */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+    filter: invert(1);
+}

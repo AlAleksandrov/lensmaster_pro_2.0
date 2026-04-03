@@ -1,0 +1,238 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Studio Statistics{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5 px-4">
+
+  <!-- PAGE HEADER -->
+  <div class="d-flex align-items-center justify-content-between mb-5">
+    <div>
+      <h1 class="fw-bold text-white mb-1">
+        <i class="bi bi-bar-chart-line-fill text-success me-2"></i>Studio Statistics
+      </h1>
+      <p class="text-muted mb-0">Insights across productions, equipment, packages and bookings.</p>
+    </div>
+    <a href="{% url 'home' %}" class="btn btn-outline-light rounded-pill px-4">
+        ← Back to Home
+    </a>
+  </div>
+
+  <!-- KPI CARDS -->
+  <div class="row g-4 mb-5">
+    {% include "accounts/partials/_stat_card.html" with icon="bi-camera-reels" label="Productions" value=total_productions color="success" %}
+    {% include "accounts/partials/_stat_card.html" with icon="bi-camera" label="Equipment items" value=total_equipment color="info" %}
+    {% include "accounts/partials/_stat_card.html" with icon="bi-box-seam" label="Service packages" value=total_packages color="warning" %}
+    {% include "accounts/partials/_stat_card.html" with icon="bi-calendar-check" label="Total bookings" value=total_bookings color="primary" %}
+    {% include "accounts/partials/_stat_card.html" with icon="bi-check-circle" label="Confirmed bookings" value=confirmed_bookings color="success" %}
+  </div>
+
+  <!-- ROW 1: Top Productions | Top Packages (favourites) -->
+  <div class="row g-4 mb-4">
+
+    <!-- Top Productions by favourites -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-heart-fill text-danger me-2"></i>Top Productions by Favourites
+          </h5>
+          {% if top_productions %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for prod in top_productions %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ prod.title }}</span>
+              <span class="badge bg-danger rounded-pill">{{ prod.fav_count }} ❤</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No favourites yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Packages by favourites -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-star-fill text-warning me-2"></i>Top Packages by Favourites
+          </h5>
+          {% if top_packages_fav %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for pkg in top_packages_fav %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ pkg.name }}</span>
+              <span class="badge bg-warning text-dark rounded-pill">{{ pkg.fav_count }} ★</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No favourites yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 2: Top Packages (bookings) | Top Equipment (favourites) -->
+  <div class="row g-4 mb-4">
+
+    <!-- Top Packages by bookings -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-calendar2-week-fill text-primary me-2"></i>Most Booked Packages
+          </h5>
+          {% if top_packages_booked %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for pkg in top_packages_booked %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ pkg.name }}</span>
+              <span class="badge bg-primary rounded-pill">{{ pkg.booking_count }} bookings</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No bookings yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Top Equipment by favourites -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-heart-fill text-danger me-2"></i>Most Favourite Equipment
+          </h5>
+          {% if top_equipment_fav %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for eq in top_equipment_fav %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ eq.brand }} {{ eq.model }}</span>
+              <span class="badge bg-danger rounded-pill">{{ eq.fav_count }} ❤</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No favourites yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 3: Top Equipment (used in productions) | Categories by productions -->
+  <div class="row g-4 mb-4">
+
+    <!-- Top Equipment used in productions -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-camera2 text-info me-2"></i>Most Used Equipment
+          </h5>
+          {% if top_equipment_used %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for eq in top_equipment_used %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ eq.brand }} {{ eq.model }}</span>
+              <span class="badge bg-info text-dark rounded-pill">{{ eq.used_count }} productions</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No equipment linked to productions yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Categories by number of productions -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-folder2-open text-success me-2"></i>Categories by Productions
+          </h5>
+          {% if categories_by_productions %}
+          <ol class="list-group list-group-flush list-group-numbered">
+            {% for cat in categories_by_productions %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span>{{ cat.name }}</span>
+              <span class="badge bg-success rounded-pill">{{ cat.prod_count }}</span>
+            </li>
+            {% endfor %}
+          </ol>
+          {% else %}
+          <p class="text-muted">No categories yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ROW 4: Bookings by status | Bookings by source -->
+  <div class="row g-4 mb-4">
+
+    <!-- Bookings by status -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-pie-chart-fill text-warning me-2"></i>Bookings by Status
+          </h5>
+          {% if bookings_by_status %}
+          <ul class="list-group list-group-flush">
+            {% for item in bookings_by_status %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span class="text-capitalize">{{ item.status }}</span>
+              {% if item.status == "confirmed" %}
+                <span class="badge bg-success rounded-pill">{{ item.count }}</span>
+              {% elif item.status == "pending" %}
+                <span class="badge bg-warning text-dark rounded-pill">{{ item.count }}</span>
+              {% else %}
+                <span class="badge bg-secondary rounded-pill">{{ item.count }}</span>
+              {% endif %}
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted">No bookings yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Bookings by source -->
+    <div class="col-lg-6">
+      <div class="card lm-bg-panel border-0 h-100">
+        <div class="card-body">
+          <h5 class="text-white fw-semibold mb-3">
+            <i class="bi bi-megaphone-fill text-info me-2"></i>Bookings by Source
+          </h5>
+          {% if bookings_by_source %}
+          <ul class="list-group list-group-flush">
+            {% for item in bookings_by_source %}
+            <li class="list-group-item bg-transparent text-white border-secondary d-flex justify-content-between align-items-center">
+              <span class="text-capitalize">{{ item.heard_from }}</span>
+              <span class="badge bg-info text-dark rounded-pill">{{ item.count }}</span>
+            </li>
+            {% endfor %}
+          </ul>
+          {% else %}
+          <p class="text-muted">No data yet.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+{% endblock %}

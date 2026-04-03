@@ -41,19 +41,27 @@
     <div class="col-lg-5">
         <div class="ps-lg-4">
 
-            <div class="mb-3 d-flex gap-2 flex-wrap">
-                <a href="{% url 'productions:production_edit' production.slug %}"
-                   class="btn btn-sm btn-warning text-dark px-3 lm-btn-action">
-                    Edit Project
-                </a>
-                <a href="{% url 'productions:production_delete' production.slug %}"
-                   class="btn btn-sm btn-danger px-3 lm-btn-action">
-                    Delete Project
-                </a>
+            <div class="d-flex flex-wrap gap-2 mb-4">
+                {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+                    <a href="{% url 'productions:production_edit' production.slug %}" class="btn btn-warning rounded-pill px-4">Edit Project</a>
+                    <a href="{% url 'productions:production_delete' production.slug %}" class="btn btn-danger rounded-pill px-4">Delete Project</a>
+                {% endif %}
+
+                {% if request.user.is_authenticated %}
+                    <form action="{% url 'productions:toggle_favorite' production.slug %}" method="post" class="d-inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn {% if production in request.user.profile.favorite_productions.all %}btn-danger{% else %}btn-outline-danger{% endif %} rounded-pill px-4">
+                            {% if production in request.user.profile.favorite_productions.all %}❤️ Remove from Favourites{% else %}🤍 Add to Favourites{% endif %}
+                        </button>
+                    </form>
+                {% endif %}
             </div>
 
             <span class="badge text-bg-primary rounded-pill px-3 py-2 mb-2">{{ production.category.name }}</span>
-            <h1 class="display-5 fw-bold mb-3">{{ production.title }}</h1>
+            <h1 class="display-5 fw-bold mb-3">
+                {{ production.title }}
+                {% featured_badge production.is_featured %}
+            </h1>
 
             <div class="d-flex align-items-center text-muted mb-4 gap-3 flex-wrap">
                 <span>📍 {{ production.location }}</span>

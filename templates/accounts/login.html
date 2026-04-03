@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+
+{% block title %}Login - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+    <div class="col-md-10 col-lg-9">
+        <div class="card border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+
+                <!-- LEFT PANEL -->
+                <div class="col-md-4 p-4 p-md-5 border-end lm-bg-panel">
+                    <h2 class="h4 fw-bold mb-2">Welcome Back</h2>
+                    <p class="text-muted mb-4 small">Sign in to access your profile and bookings.</p>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2">📷 View your productions</li>
+                        <li class="mb-2">📅 Track your bookings</li>
+                        <li class="mb-2">❤️ Your favourite shoots</li>
+                    </ul>
+                </div>
+
+                <!-- RIGHT PANEL: FORM -->
+                <div class="col-md-8 bg-white p-4 p-md-5">
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-4 small mb-4">
+                        Invalid username or password.
+                    </div>
+                    {% endif %}
+
+                    <form method="post" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Username</label>
+                                {{ form.username }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Password</label>
+                                {{ form.password }}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'accounts:register' %}" class="text-muted small">Don't have an account?</a>
+                            <button type="submit" class="btn btn-success rounded-pill px-4">Login</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

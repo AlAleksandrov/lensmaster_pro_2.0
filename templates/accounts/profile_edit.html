@@ -1,0 +1,90 @@
+{% extends 'base.html' %}
+
+{% block title %}Edit Profile - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center py-4 py-lg-5">
+    <div class="col-md-10 col-lg-9">
+        <div class="card border-0 rounded-4 overflow-hidden">
+            <div class="row g-0">
+
+                <!-- LEFT PANEL -->
+                <div class="col-md-4 p-4 p-md-5 border-end lm-bg-panel">
+                    <h2 class="h4 fw-bold mb-2">Edit Profile</h2>
+                    <p class="text-muted mb-4 small">Update your personal information.</p>
+                    <ul class="list-unstyled small text-muted mb-0">
+                        <li class="mb-2">✅ Name & Email</li>
+                        <li class="mb-2">✅ Phone & City</li>
+                        <li class="mb-2">✅ Profile picture</li>
+                        <li class="mb-2">✅ Bio</li>
+                    </ul>
+                </div>
+
+                <!-- RIGHT PANEL: FORM -->
+                <div class="col-md-8 bg-white p-4 p-md-5">
+                    {% if form.errors %}
+                    <div class="alert alert-danger rounded-4 small mb-4">
+                        <p class="fw-bold mb-2">Please correct the following:</p>
+                        <ul class="mb-0">
+                            {% for field in form %}
+                                {% for error in field.errors %}
+                                    <li>{{ field.label }}: {{ error }}</li>
+                                {% endfor %}
+                            {% endfor %}
+                        </ul>
+                    </div>
+                    {% endif %}
+
+                    <form method="post" enctype="multipart/form-data" novalidate>
+                        {% csrf_token %}
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">First Name</label>
+                                {{ form.first_name }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Last Name</label>
+                                {{ form.last_name }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Email</label>
+                                {{ form.email }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Phone</label>
+                                {{ form.phone }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">City</label>
+                                {{ form.city }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Bio</label>
+                                {{ form.bio }}
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label fw-semibold">Profile Picture</label>
+                                {{ form.profile_picture }}
+                                {% if profile.profile_picture %}
+                                    <div class="mt-2">
+                                        <img src="{{ profile.profile_picture.url }}"
+                                             class="rounded-circle" style="width:60px;height:60px;object-fit:cover;"
+                                             alt="Current picture">
+                                        <span class="text-muted small ms-2">Current picture</span>
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4">
+                            <a href="{% url 'accounts:profile_detail' %}" class="btn btn-outline-secondary rounded-pill">Cancel</a>
+                            <button type="submit" class="btn btn-success rounded-pill px-4">Save Changes</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

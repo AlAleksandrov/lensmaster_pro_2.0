@@ -4,7 +4,11 @@
 
 {% block content %}
 
-{% include 'partials/page_header.html' with title='Our Portfolio' subtitle='Browse our work by category — from weddings to commercial productions.' cta_url=category_create_url cta_text='+ Add Category' %}
+{% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+    {% include 'partials/page_header.html' with title='Our Portfolio' subtitle='Browse our work by category — from weddings to commercial productions.' cta_url=category_create_url cta_text='+ Add Category' %}
+{% else %}
+    {% include 'partials/page_header.html' with title='Our Portfolio' subtitle='Browse our work by category.' %}
+{% endif %}
 
 <form method="get" action="{% url 'productions:category_list' %}" class="d-flex gap-2 mb-5">
     <input type="text" name="q" value="{{ search_query }}"
@@ -35,17 +39,19 @@
         </div>
 
         <!-- CATEGORY ACTIONS -->
-        <div class="d-flex gap-2">
-          <a href="{% url 'productions:category_edit' group.category.slug %}"
-             class="btn btn-warning rounded-pill px-4 text-nowrap">
-            Edit Category
-          </a>
+        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+            <div class="d-flex gap-2">
+              <a href="{% url 'productions:category_edit' group.category.slug %}"
+                 class="btn btn-warning rounded-pill px-4 text-nowrap">
+                Edit Category
+              </a>
 
-          <a href="{% url 'productions:category_delete' group.category.slug %}"
-             class="btn btn-danger rounded-pill px-4 text-nowrap">
-            Delete Category
-          </a>
-        </div>
+              <a href="{% url 'productions:category_delete' group.category.slug %}"
+                 class="btn btn-danger rounded-pill px-4 text-nowrap">
+                Delete Category
+              </a>
+            </div>
+        {% endif %}
     </div>
 
     <div class="row g-4">

@@ -7,9 +7,11 @@
     <h1 class="display-5 fw-bold text-white mb-2">Professional Equipment</h1>
     <div class="d-flex justify-content-between align-items-center mb-5">
         <p class="text-secondary mb-0">High-end gear used for our professional productions.</p>
-        <a href="{% url 'inventory:equipment_create' %}" class="btn btn-success rounded-pill px-4 fw-bold">
-            + Add Equipment
-        </a>
+        {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+            <a href="{% url 'inventory:equipment_create' %}" class="btn btn-success rounded-pill px-4 fw-bold">
+                + Add Equipment
+            </a>
+        {% endif %}
     </div>
 
     {% for group in grouped_equipment %}
@@ -43,7 +45,9 @@
                         <p class="text-secondary small mb-4">Model: {{ item.model }}</p>
 
                         <div class="mt-auto pt-3 border-top border-secondary border-opacity-25 d-flex justify-content-between align-items-center">
-                            <code class="text-success small">{{ item.internal_id }}</code>
+                            {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+                                <code class="text-success small">{{ item.internal_id }}</code>
+                            {% endif %}
                             <span class="text-secondary small">View Details →</span>
                         </div>
 

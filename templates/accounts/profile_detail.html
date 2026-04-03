@@ -1,0 +1,152 @@
+{% extends 'base.html' %}
+
+{% block title %}My Profile - LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row g-4">
+
+        <!-- LEFT: Avatar + Info -->
+        <div class="col-md-4">
+            <div class="card border-0 rounded-4 overflow-hidden text-center p-4 lm-bg-panel">
+                {% if profile.profile_picture %}
+                    <img src="{{ profile.profile_picture.url }}" class="rounded-circle mx-auto mb-3"
+                         style="width:120px;height:120px;object-fit:cover;" alt="Avatar">
+                {% else %}
+                    <div class="rounded-circle bg-secondary mx-auto mb-3 d-flex align-items-center justify-content-center"
+                         style="width:120px;height:120px;">
+                        <span class="text-white fs-1">{{ request.user.first_name|first|upper }}</span>
+                    </div>
+                {% endif %}
+
+                <h4 class="fw-bold mb-1">{{ request.user.get_full_name }}</h4>
+                <p class="text-muted small mb-1">@{{ request.user.username }}</p>
+                <p class="text-muted small mb-3">{{ request.user.email }}</p>
+
+                {% if profile.phone_number %}
+                    <p class="small mb-1">📞 {{ profile.phone_number }}</p>
+                {% endif %}
+                {% if profile.city %}
+                    <p class="small mb-3">📍 {{ profile.city }}</p>
+                {% endif %}
+
+                {% if profile.bio %}
+                    <p class="small text-muted fst-italic">{{ profile.bio }}</p>
+                {% endif %}
+
+                <a href="{% url 'accounts:profile_edit' %}" class="btn btn-outline-success rounded-pill mt-3">
+                    ✏️ Edit Profile
+                </a>
+            </div>
+        </div>
+
+        <!-- RIGHT: Bookings + Favourites -->
+        <div class="col-md-8">
+
+            <!-- Recent Bookings -->
+            <div class="card border-0 rounded-4 p-4 mb-4 shadow-sm">
+                <h5 class="fw-bold mb-3">📅 My Recent Bookings</h5>
+                {% if bookings %}
+                    <ul class="list-group list-group-flush">
+                        {% for booking in bookings %}
+                        <li class="list-group-item d-flex justify-content-between align-items-center px-0 bg-transparent border-secondary-subtle">
+                            <div>
+                                <span class="fw-semibold">{{ booking.event_date }}</span>
+                                {% if booking.package %}
+                                    <span class="text-muted small ms-2">— {{ booking.package.name }}</span>
+                                {% endif %}
+                            </div>
+                            <span class="badge rounded-pill
+                                {% if booking.status == 'confirmed' %}bg-success
+                                {% elif booking.status == 'cancelled' %}bg-danger
+                                {% else %}bg-warning text-dark{% endif %}">
+                                {{ booking.get_status_display }}
+                            </span>
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted small mb-0">No bookings yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Favourite Productions -->
+            <div class="card border-0 rounded-4 p-4 mb-4 shadow-sm">
+                <h5 class="fw-bold mb-3">❤️ Favourite Productions</h5>
+                {% if favorite_productions %}
+                    <div class="row g-3">
+                        {% for production in favorite_productions %}
+                        <div class="col-6 col-lg-4">
+                            <a href="{% url 'productions:production_detail' production.slug %}" class="text-decoration-none">
+                                <div class="card border rounded-3 overflow-hidden h-100 hover-shadow">
+                                    {% if production.cover_image %}
+                                        <img src="{{ production.cover_image.url }}" class="card-img-top" style="height:100px; object-fit:cover;">
+                                    {% else %}
+                                        <div class="bg-secondary d-flex align-items-center justify-content-center" style="height:100px;">
+                                            <i class="bi bi-image text-white-50"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body p-2 text-center">
+                                        <p class="small fw-bold mb-0 text-dark text-truncate">{{ production.title }}</p>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No favourite productions yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Favourite Packages -->
+            <div class="card border-0 rounded-4 p-4 mb-4 shadow-sm">
+                <h5 class="fw-bold mb-3">🎁 Favorite Packages</h5>
+                {% if favorite_packages %}
+                    <div class="list-group list-group-flush">
+                        {% for pkg in favorite_packages %}
+                        <a href="{% url 'bookings:package_detail' pkg.pk %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center px-0 bg-transparent border-secondary-subtle">
+                            <span class="fw-semibold text-dark">{{ pkg.name }}</span>
+                            <span class="badge bg-success-subtle text-success rounded-pill">{{ pkg.price }}€</span>
+                        </a>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No favorite packages yet.</p>
+                {% endif %}
+            </div>
+
+            <!-- Favourite Equipment -->
+            <div class="card border-0 rounded-4 p-4 shadow-sm">
+                <h5 class="fw-bold mb-3">📦 Favourite Equipment</h5>
+                {% if favorite_equipment %}
+                    <div class="row g-3">
+                        {% for item in favorite_equipment %}
+                        <div class="col-6 col-lg-4">
+                            <a href="{% url 'inventory:equipment_detail' item.pk %}" class="text-decoration-none">
+                                <div class="card border rounded-3 overflow-hidden h-100 hover-shadow">
+                                    {% if item.cover_image %}
+                                        <img src="{{ item.cover_image.url }}" class="card-img-top" style="height:100px; object-fit:cover;">
+                                    {% else %}
+                                        <div class="bg-light d-flex align-items-center justify-content-center" style="height:100px;">
+                                            <i class="bi bi-camera text-muted"></i>
+                                        </div>
+                                    {% endif %}
+                                    <div class="card-body p-2 text-center">
+                                        <p class="small fw-bold mb-0 text-dark text-truncate">{{ item.brand }} {{ item.model }}</p>
+                                        <span class="badge bg-dark-subtle text-dark smaller">{{ item.get_equipment_type_display }}</span>
+                                    </div>
+                                </div>
+                            </a>
+                        </div>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    <p class="text-muted small mb-0">No favourite equipment yet.</p>
+                {% endif %}
+            </div>
+
+        </div>
+    </div>
+</div>
+{% endblock %}

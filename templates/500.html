@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block title %}500 - Server Error | LensMaster Pro{% endblock %}
+
+{% block content %}
+<div class="py-4 py-lg-5">
+    <div class="row justify-content-center">
+        <div class="col-md-9 col-lg-7">
+            <div class="card border-0 rounded-4 overflow-hidden text-center">
+                <div class="p-4 p-md-5"
+                     style="background: radial-gradient(900px circle at 50% 0%, rgba(255,140,0,0.10), rgba(255,255,255,0) 55%);">
+                    <div class="text-muted small text-uppercase fw-bold mb-2">Error 500</div>
+                    <h1 class="display-6 fw-bold mb-2">Oops! Something went wrong.</h1>
+                    <p class="text-muted mb-4">
+                        An unexpected error occurred on our server. Our team has been notified
+                        and is working on a fix. Please try again in a few moments.
+                    </p>
+                    <div class="d-grid gap-2 d-sm-flex justify-content-sm-center">
+                        <a href="{% url 'home' %}" class="btn btn-success btn-lg rounded-pill px-5">
+                            ← Back to Home
+                        </a>
+                        <button onclick="location.reload()" class="btn btn-outline-dark btn-lg rounded-pill px-5">
+                            Try Again
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

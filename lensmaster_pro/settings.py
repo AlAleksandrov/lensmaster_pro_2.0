@@ -37,7 +37,7 @@ ALLOWED_HOSTS.extend([
     "127.0.0.1",
     "localhost",
     "rosella-unshotted-adjustably.ngrok-free.dev",
-    'lensmaster-pro-2-0.onrender.com/',
+    'lensmaster-pro-2-0.onrender.com',
     'lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
     'lensmasterpro.azurewebsites.net',
     '0.0.0.0',

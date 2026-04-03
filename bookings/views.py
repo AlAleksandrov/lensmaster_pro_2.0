@@ -47,7 +47,7 @@ class BookingCreateView(CreateView):
         return form
 
 
-class BookingListView(ListView):
+class BookingListView(PhotographerRequiredMixin, ListView):
     model = BookingRequest
     template_name = 'bookings/booking_list.html'
     context_object_name = 'bookings'

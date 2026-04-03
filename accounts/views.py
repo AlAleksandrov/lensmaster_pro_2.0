@@ -5,7 +5,6 @@ from django.db.models import Count
 from django.shortcuts import get_object_or_404
 from django.urls import reverse_lazy
 from django.views.generic import CreateView, DetailView, UpdateView, TemplateView
-
 from accounts.forms import UserRegisterForm, ProfileEditForm
 from accounts.models import Profile
 from bookings.models import BookingRequest, ServicePackage
@@ -38,7 +37,7 @@ class UserLogoutView(LogoutView):
     next_page = reverse_lazy('home')
 
 
-class ProfileDetailView(DetailView):
+class ProfileDetailView(LoginRequiredMixin, DetailView):
     model = Profile
     template_name = 'accounts/profile_detail.html'
     context_object_name = 'profile'

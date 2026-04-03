@@ -21,9 +21,10 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
 from rest_framework_simplejwt import views
-from common.views import HomeView, custom_404_view
+from common.views import HomeView, custom_404_view, custom_500_view
 
 handler404 = custom_404_view
+handler500 = custom_500_view
 urlpatterns = [
     path('', HomeView.as_view(), name='home'),
     path('accounts/', include(('accounts.urls', 'accounts'), namespace='accounts')),

@@ -31,3 +31,12 @@ def featured_badge(is_featured):
     if is_featured:
         return '⭐ Featured'
     return ''
+
+@register.simple_tag(takes_context=True)
+def can_manage(context, obj=None):
+    request = context.get('request')
+    if not request or not request.user.is_authenticated:
+        return False
+    if request.user.is_superuser or request.user.is_staff:
+        return True
+    return request.user.groups.filter(name='Photographers').exists()

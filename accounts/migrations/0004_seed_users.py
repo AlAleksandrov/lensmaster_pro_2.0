@@ -83,7 +83,7 @@ def forwards(apps, schema_editor):
             profile.bio = bio
         profile.save()
 
-    # ── Фаворити: пакети ─────────────────────────────────────────────────────
+    # ── Favourites: packets ─────────────────────────────────────────────────────
     packages_map = {p.name: p for p in ServicePackage.objects.all()}
 
     for username, favs in FAVOURITES.items():
@@ -96,7 +96,7 @@ def forwards(apps, schema_editor):
             if pkg:
                 profile.favorite_packages.add(pkg)
 
-    # ── Фаворити: продукции ──────────────────────────────────────────────────
+    # ── Favourites: productions ──────────────────────────────────────────────────
     productions = list(Production.objects.all())
     if productions:
         prod_assignments = {
@@ -119,7 +119,7 @@ def forwards(apps, schema_editor):
             except Profile.DoesNotExist:
                 continue
 
-    # ── Фаворити: оборудване ─────────────────────────────────────────────────
+    # ── Favourites: equipment ─────────────────────────────────────────────────
     all_equipment = list(Equipment.objects.all())
     if all_equipment:
         eq_assignments = {

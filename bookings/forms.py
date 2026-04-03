@@ -15,8 +15,25 @@ class BookingRequestForm(forms.ModelForm):
             'heard_from',
             'event_date',
             'package',
-            'message'
+            'message',
         ]
+        labels = {
+            'first_name': 'First Name',
+            'last_name': 'Last Name',
+            'email': 'Email Address',
+            'phone': 'Phone Number',
+            'city': 'City',
+            'heard_from': 'How did you hear about us?',
+            'event_date': 'Event Date',
+            'package': 'Service Package',
+            'message': 'Message',
+        }
+        help_texts = {
+            'phone': 'Please provide a valid phone number (at least 10 digits).',
+            'event_date': 'Please select a future date for your event.',
+            'package': 'Select the service package that best suits your needs.',
+            'message': 'Please tell us more about your event (at least 10 characters)...',
+        }
         widgets = {
             'event_date': forms.DateInput(
                 attrs={
@@ -109,48 +126,66 @@ class ServicePackageForm(forms.ModelForm):
     class Meta:
         model = ServicePackage
         fields = ['name', 'category', 'price', 'duration_hours', 'max_photos_included', 'description', 'is_active']
+        labels = {
+            'name': 'Package Name',
+            'category': 'Category',
+            'price': 'Price (EUR)',
+            'duration_hours': 'Duration (hours)',
+            'max_photos_included': 'Max Photos Included',
+            'description': 'Description',
+            'is_active': 'Active',
+        }
+        help_texts = {
+            'name': 'Enter a unique package name.',
+            'category': 'Select the category that best suits your needs.',
+            'price': 'Enter the price, greater than 0, for this package (EUR).',
+            'duration_hours': 'Enter the duration of the service in hours.',
+            'max_photos_included': 'Enter the maximum number of photos that can be included in this package.',
+            'description': 'Provide a brief description of the package.',
+            'is_active': 'Check if the package is available for booking.',
+        }
 
         widgets = {
             'name': forms.TextInput(
                 attrs={
                     'class': 'form-control bg-light text-white border-secondary',
-                    'placeholder': 'Package name'
+                    'placeholder': 'Package name',
                 }
             ),
             'category': forms.Select(
                 attrs={
                     'class': 'form-select bg-light text-white border-secondary',
-                    'placeholder': 'Select category'
+                    'placeholder': 'Select category',
                 }
             ),
             'price': forms.NumberInput(
                 attrs={
                     'class': 'form-control bg-light text-white border-secondary',
-                    'placeholder': 'Price'
+                    'placeholder': 'Price',
                 }
             ),
             'duration_hours': forms.NumberInput(
                 attrs={
                     'class': 'form-control bg-light text-white border-secondary',
-                    'placeholder': 'Duration in hours'
+                    'placeholder': 'Duration in hours',
                 }
             ),
             'max_photos_included': forms.NumberInput(
                 attrs={
                     'class': 'form-control bg-dark text-white border-secondary',
-                    'placeholder': 'Max photos included'
+                    'placeholder': 'Max photos included',
                 }
             ),
             'description': forms.Textarea(
                 attrs={
                     'class': 'form-control bg-light text-white border-secondary',
                     'rows': 3,
-                    'placeholder': 'Package description'
+                    'placeholder': 'Package description',
                 }
             ),
             'is_active': forms.CheckboxInput(
                 attrs={
-                    'class': 'form-check-input'
+                    'class': 'form-check-input',
                 }
             ),
         }

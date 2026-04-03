@@ -9,6 +9,7 @@ urlpatterns = [
     path('create/', views.EquipmentCreateView.as_view(), name='equipment_create'),
     path('<int:pk>/', include([
         path('', views.EquipmentDetailView.as_view(), name='equipment_detail'),
+        path('favorite/', views.ToggleFavoriteEquipmentView.as_view(), name='toggle_favorite_equipment'),
         path('edit/', views.EquipmentUpdateView.as_view(), name='equipment_edit'),
         path('delete/', views.EquipmentDeleteView.as_view(), name='equipment_delete'),
         ]),

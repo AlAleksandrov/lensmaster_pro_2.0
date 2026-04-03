@@ -1,5 +1,9 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+from common.mixins import PhotographerRequiredMixin
 from inventory.forms import EquipmentForm
 from inventory.models import Equipment
 
@@ -48,21 +52,21 @@ class EquipmentDetailView(DetailView):
         return context
 
 
-class EquipmentCreateView(CreateView):
+class EquipmentCreateView(PhotographerRequiredMixin, CreateView):
     model = Equipment
     form_class = EquipmentForm
     template_name = 'inventory/equipment_form.html'
     success_url = reverse_lazy('inventory:equipment_list')
 
 
-class EquipmentUpdateView(UpdateView):
+class EquipmentUpdateView(PhotographerRequiredMixin, UpdateView):
     model = Equipment
     form_class = EquipmentForm
     template_name = 'inventory/equipment_form.html'
     success_url = reverse_lazy('inventory:equipment_list')
 
 
-class EquipmentDeleteView(DeleteView):
+class EquipmentDeleteView(PhotographerRequiredMixin, DeleteView):
     model = Equipment
     template_name = 'inventory/equipment_confirm_delete.html'
     success_url = reverse_lazy('inventory:equipment_list')
@@ -92,3 +96,15 @@ class EquipmentByTypeListView(ListView):
                 break
         return context
 
+
+class ToggleFavoriteEquipmentView(LoginRequiredMixin, View):
+    def post(self, request, pk):
+        equipment = get_object_or_404(Equipment, pk=pk)
+        profile = request.user.profile
+
+        if equipment in profile.favorite_equipment.all():
+            profile.favorite_equipment.remove(equipment)
+        else:
+            profile.favorite_equipment.add(equipment)
+
+        return redirect('inventory:equipment_detail', pk=pk)

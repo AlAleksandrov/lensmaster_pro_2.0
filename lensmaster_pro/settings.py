@@ -38,8 +38,8 @@ ALLOWED_HOSTS.extend([
     "localhost",
     "rosella-unshotted-adjustably.ngrok-free.dev",
     'lensmaster-pro-2-0.onrender.com',
-    'lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
-    'lensmasterpro.azurewebsites.net',
+    'lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net',
+    'lensmasterpro2.azurewebsites.net',
     '0.0.0.0',
 ])
 
@@ -51,8 +51,8 @@ CSRF_TRUSTED_ORIGINS = ([
         "http://localhost",
         "https://rosella-unshotted-adjustably.ngrok-free.dev",
         'https://lensmaster-pro-2-0.onrender.com',
-        'https://lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net',
-        'https://lensmasterpro.azurewebsites.net',
+        'https://lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net',
+        'https://lensmasterpro2.azurewebsites.net',
     ])
 
 # ───── CORS ─────

@@ -206,7 +206,7 @@ To simplify evaluation, the project includes pre-configured users:
 |---|---|
 | 3 Photographers | alex_lens, maria_photo, ivan_shoot → group Photographers |
 | 7 Regular Users | sofia_bride, peter_corp, elena_events, georgi_client, anna_wedding, nikola_biz, diana_art → group Clients |
-| Password | Test1234! for all |
+| Password | Test1234! (one pass for all) |
 
 > Admin and Photographers has full CRUD + access to `/accounts/stats/`
 

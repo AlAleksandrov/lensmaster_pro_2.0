@@ -21,8 +21,9 @@ from django.contrib import admin
 from django.urls import path, include
 from drf_spectacular.views import SpectacularSwaggerView, SpectacularRedocView, SpectacularAPIView
 from rest_framework_simplejwt import views
-from common.views import HomeView, custom_404_view, custom_500_view
+from common.views import HomeView, custom_404_view, custom_500_view, custom_403_view
 
+handler403 = custom_403_view
 handler404 = custom_404_view
 handler500 = custom_500_view
 urlpatterns = [

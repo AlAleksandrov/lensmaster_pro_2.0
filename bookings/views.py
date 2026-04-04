@@ -3,6 +3,7 @@ from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import CreateView, ListView, UpdateView, DeleteView, DetailView
+from django.core.exceptions import PermissionDenied
 from bookings.forms import BookingRequestForm, ServicePackageForm
 from bookings.models import BookingRequest, ServicePackage
 from django.db.models import Q
@@ -119,6 +120,14 @@ class ServicePackageDetailView(DetailView):
     model = ServicePackage
     template_name = 'bookings/package_detail.html'
     context_object_name = 'package'
+
+    def get_object(self, queryset=None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        is_staff = user.is_superuser or (user.is_authenticated and user.groups.filter(name='Photographers').exists())
+        if not obj.is_active and not is_staff:
+            raise PermissionDenied
+        return obj
 
 
 class ServicePackageCreateView(PhotographerRequiredMixin, CreateView):

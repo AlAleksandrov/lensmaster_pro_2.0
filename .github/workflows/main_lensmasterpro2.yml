@@ -72,5 +72,3 @@ jobs:
         id: deploy-to-webapp
         with:
           app-name: 'lensmasterpro2'
-          slot-name: 'Production'
-          

@@ -214,8 +214,8 @@ To simplify evaluation, the project includes pre-configured users:
 
 ## 🌐 Live Demo
 
-- [Live Demo — Render](https://lensmaster-pro-2-0.onrender.com/)
-- [Live Demo — Azure](https://lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net/)
+- [Live Demo — Render](https://lensmaster-pro-2-0.onrender.com)
+- [Live Demo — Azure](https://lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net)
 
 ---
 

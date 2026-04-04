@@ -257,6 +257,10 @@ To test the access denied error handler, set `DEBUG=False` in your `.env`, go to
 http://127.0.0.1:8000/bookings/packages/<int:pk>/
 
 http://127.0.0.1:8000/inventory/<int:pk>/
+
+Visit anonymous (client) that route:
+
+http://127.0.0.1:8000/accounts/stats/
 ```
 
 ---

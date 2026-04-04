@@ -227,7 +227,7 @@ To simplify evaluation, the project includes pre-configured users:
 ![Profile page](static/images/screenshot-profile_page.png)
 ![Booking list](static/images/screenshot-booking_list.png)
 ![Studio stats](static/images/screenshot-stats.png)
-![403 error](static/images/screenshot-403_access_denied.png)]
+![403 error](static/images/screenshot-403_access_denied.png)
 
 ---
 

@@ -21,9 +21,12 @@
 - [🌐 Live Demo](#-live-demo)
 - [🖼️ Screenshots](#️-screenshots)
 - [🧪 Data Management](#-data-management)
+- [🔒 Custom 403 Page](#-custom-403-page)
 - [🧩 Custom 404 Page](#-custom-404-page)
 - [💥 Custom 500 Page](#-custom-500-page)
 - [📊 Studio Statistics](#-studio-statistics)
+- [⚙️ Async Tasks on Render — Django Q2](#️-async-tasks-on-render--django-q2)
+- [☁️ Async Tasks on Azure — Celery & REST](#️-async-tasks-on-azure--celery--rest)
 - [🗃️ Tech Stack](#️-tech-stack)
 - [🧾 Project Notes](#-project-notes)
 
@@ -32,7 +35,7 @@
 ## ✨ Key Features
 
 - **Multi-app Architecture**: Clean separation of concerns across `accounts`, `bookings`, `productions`, `inventory`, and `common`.
-- **Role-Based Access Control**: Custom `PhotographerRequiredMixin` restricts all CRUD operations to the `Photographers` group. Regular users and anonymous visitors have read-only access.
+- **Role-Based Access Control**: Custom `PhotographerRequiredMixin` restricts all CRUD operations to the `Photographers` group. Regular users and anonymous visitors have read-only access. The owner (super user) have full access (staff management).
 - **Full CRUD Functionality**: Complete management for **Productions**, **Categories**, **Service Packages**, and **Equipment** — all protected behind permission checks.
 - **Dynamic Portfolio**: Categorized project showcase with detailed production pages, related items, search, and pagination.
 - **Client Booking System**: Public booking request form with auto-fill from user profile, server-side validation, and status tracking.
@@ -41,7 +44,7 @@
 - **Studio Statistics Dashboard**: Photographer-only analytics page with top productions, most-booked packages, equipment usage, booking breakdowns by status and source.
 - **Package Filtering**: Service packages grouped by category with dedicated per-category listing pages.
 - **Cloudinary Integration**: Production image storage via Cloudinary in deployed environments; local filesystem in development.
-- **Production Ready**: PostgreSQL, environment-based configuration, WhiteNoise static files, and custom 404 error handling.
+- **Production Ready**: PostgreSQL, environment-based configuration, WhiteNoise static files, and custom 403, 404, and 500 error handling.
 
 ---
 
@@ -205,21 +208,26 @@ To simplify evaluation, the project includes pre-configured users:
 | 7 Regular Users | sofia_bride, peter_corp, elena_events, georgi_client, anna_wedding, nikola_biz, diana_art → group Clients |
 | Password | Test1234! for all |
 
-> Photographer has full CRUD + access to `/accounts/stats/`
+> Admin and Photographers has full CRUD + access to `/accounts/stats/`
 
 ---
 
 ## 🌐 Live Demo
 
 - [Live Demo — Render](https://lensmaster-pro-2-0.onrender.com/)
-- [Live Demo — Azure](https://lensmasterpro-apckfyhscgf5dsbq.spaincentral-01.azurewebsites.net/)
+- [Live Demo — Azure](https://lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net/)
 
 ---
 
 ## 🖼️ Screenshots
-![Home page](static/images/screenshot-home.png)
-![Portfolio page](static/images/screenshot-portfolio.png)
-![Production details](static/images/screenshot-production.png)
+![Home page](static/images/screenshot-home-new.png)
+![Portfolio page](static/images/screenshot-our-portfolio.png)
+![Production details](static/images/screenshot-production-new.png)
+![Booking request](static/images/screenshot-booking_request.png)
+![Profile page](static/images/screenshot-profile_page.png)
+![Booking list](static/images/screenshot-booking_list.png)
+![Studio stats](static/images/screenshot-stats.png)
+![403 error](static/images/screenshot-403_access_denied.png)]
 
 ---
 
@@ -240,6 +248,16 @@ To simplify evaluation, the project includes pre-configured users:
 4. Add **Service Packages**.
 5. Add **Productions** linked to categories.
 6. Manage **Booking Requests** and update their status.
+
+---
+
+## 🔒 Custom 403 Page
+To test the access denied error handler, set `DEBUG=False` in your `.env`, go to Service package or Inventory list page like admin or photographer. Choose some package or equipment from the list, then in the package or equipment detail view page remember the number in url (<int:pk>) and click "Edit Package" button. Then uncheck Active and save changes. Visit anonymous (client) that route:
+```
+http://127.0.0.1:8000/bookings/packages/<int:pk>/
+
+http://127.0.0.1:8000/inventory/<int:pk>/
+```
 
 ---
 
@@ -274,6 +292,179 @@ The `/accounts/stats/` page is accessible only to Photographers and superusers. 
 
 ---
 
+## ⚙️ Async Tasks on Render — Django Q2
+
+When a photographer confirms a client booking request, the system needs to send a confirmation email without blocking the HTTP response. This is the primary use case for async task processing in LensMaster Pro — the view confirms the booking, enqueues the email task, and returns immediately, while the worker handles the actual sending in the background.
+
+LensMaster Pro uses **[Django Q2](https://django-q2.readthedocs.io/)** for this on the **Render** deployment. Django Q2 is a native Django task queue that requires no external broker — it uses the existing **PostgreSQL** database as its backend, making it ideal for Render's free-tier environment where Redis is not available.
+
+### How it works
+
+```
+HTTP Request → Django View → async_task() → ORM Broker (PostgreSQL)
+                                                    ↓
+                                           Django Q2 Cluster Worker
+                                                    ↓
+                                           Task executed in background
+```
+
+### Configuration (`settings.py`)
+
+```python
+Q_CLUSTER = {
+    'name': 'lensmaster_orm',
+    'workers': 2,
+    'recycle': 500,
+    'timeout': 60,
+    'retry': 120,
+    'queue_limit': 50,
+    'bulk': 10,
+    'orm': 'default',   # uses PostgreSQL — no Redis needed
+}
+```
+
+### Starting the worker
+
+```bash
+python manage.py qcluster
+```
+
+> On Render, the worker runs as a separate **Background Worker** service defined in `render.yaml`, alongside the main web service.
+
+### Example usage
+
+```python
+from django_q.tasks import async_task
+
+# Fire-and-forget: send booking confirmation email in background
+async_task('bookings.tasks.send_booking_confirmation', booking_id=booking.pk)
+```
+
+### Task monitoring
+
+Scheduled and completed tasks are visible in the **Django Admin** under the `Django Q` section — no extra tooling required.
+
+---
+
+## ☁️ Async Tasks on Azure — Celery & Redis
+
+The same use case applies on Azure — when a photographer confirms a booking request, the confirmation email must be sent asynchronously so the HTTP response is not held up by the mail server. A DRF endpoint receives the confirmation action, enqueues a Celery task, and returns `202 Accepted` immediately. The Celery worker then picks up the task from Redis and processes it independently.
+
+On the **Azure** deployment, LensMaster Pro uses **[Celery](https://docs.celeryq.dev/)** with **Redis** as the message broker for this. The Django REST Framework (DRF) API exposes the endpoint that triggers the task, cleanly separating the confirmation action from the side-effect of sending the email.
+
+### How it works
+
+```
+HTTP Request → Django View / DRF Endpoint
+                        ↓
+              task.delay() / task.apply_async()
+                        ↓
+              Redis (message broker)
+                        ↓
+              Celery Worker process
+                        ↓
+              Task executed (DB write, email, etc.)
+```
+
+### Installation
+
+```bash
+pip install celery redis django-celery-results
+```
+
+### Configuration
+
+**`lensmaster_pro/celery.py`**
+```python
+import os
+from celery import Celery
+
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'lensmaster_pro.settings')
+
+app = Celery('lensmaster_pro')
+app.config_from_object('django.conf:settings', namespace='CELERY')
+app.autodiscover_tasks()
+```
+
+**`lensmaster_pro/__init__.py`**
+```python
+from .celery import app as celery_app
+
+__all__ = ('celery_app',)
+```
+
+**`settings.py`**
+```python
+CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
+CELERY_RESULT_BACKEND = 'django-db'   # stores results in PostgreSQL via django-celery-results
+CELERY_ACCEPT_CONTENT = ['json']
+CELERY_TASK_SERIALIZER = 'json'
+CELERY_RESULT_SERIALIZER = 'json'
+CELERY_TIMEZONE = 'Europe/Sofia'
+
+INSTALLED_APPS += ['django_celery_results']
+```
+
+### Defining a task
+
+```python
+# bookings/tasks.py
+from celery import shared_task
+from django.core.mail import send_mail
+from bookings.models import BookingRequest
+
+@shared_task
+def send_booking_confirmation(booking_id):
+    booking = BookingRequest.objects.get(pk=booking_id)
+    send_mail(
+        subject='Booking Confirmed — LensMaster Pro',
+        message=f'Hi {booking.first_name}, your session on {booking.preferred_date} is confirmed.',
+        from_email='noreply@lensmasterpro.com',
+        recipient_list=[booking.email],
+    )
+```
+
+### Triggering from a DRF view
+
+```python
+# bookings/api/views.py
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from bookings.tasks import send_booking_confirmation
+
+class BookingConfirmView(APIView):
+    def post(self, request, pk):
+        send_booking_confirmation.delay(pk)   # enqueues task, returns immediately
+        return Response({'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
+```
+
+### Starting the worker
+
+```bash
+# Development
+celery -A lensmaster_pro worker --loglevel=info
+
+# Production (with concurrency)
+celery -A lensmaster_pro worker --loglevel=warning --concurrency=2
+```
+
+### Azure deployment
+
+On Azure, the Celery worker runs as a separate **Web Job** or second **App Service** instance pointing to the same Redis and PostgreSQL resources.
+
+| Component | Azure Service |
+|---|---|
+| **Web App** | Azure App Service (Python 3.12) |
+| **Celery Worker** | Azure App Service (separate slot) or Azure Container Instance |
+| **Message Broker** | Azure Cache for Redis |
+| **Result Backend** | Azure Database for PostgreSQL (via `django-celery-results`) |
+| **Media Storage** | Cloudinary |
+
+> Set `REDIS_URL` and all other secrets via **Azure App Service → Configuration → Application Settings** — never hardcode them.
+
+---
+
 ## 🗃️ Tech Stack
 
 | Layer | Technology |
@@ -286,7 +477,7 @@ The `/accounts/stats/` page is accessible only to Photographers and superusers. 
 | **Environment** | `python-dotenv` |
 | **Frontend** | Bootstrap 5.3 + Bootstrap Icons + Custom CSS (dark theme, green glow panels) |
 | **Admin** | `django-unfold` (enhanced admin UI) |
-| **Task Queue** | `django-q` |
+| **Task Queue** | `django-q` + Celery & Redis |
 | **API** | `djangorestframework` |
 | **Deployment** | Render + Azure |
 

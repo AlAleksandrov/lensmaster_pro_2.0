@@ -1,8 +1,10 @@
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.shortcuts import get_object_or_404, redirect
 from django.urls import reverse_lazy
 from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView, DeleteView
+
 from common.mixins import PhotographerRequiredMixin
 from inventory.forms import EquipmentForm
 from inventory.models import Equipment
@@ -16,7 +18,14 @@ class EquipmentListView(ListView):
     paginate_by = 6
 
     def get_queryset(self):
-        return Equipment.objects.filter(is_active=True).prefetch_related('productions').order_by('equipment_type', 'brand', 'model')
+        qs = Equipment.objects.prefetch_related('productions').order_by('equipment_type', 'brand', 'model')
+        user = getattr(self.request, 'user', None)
+        is_photographer = False
+        if user:
+            is_photographer = getattr(user, 'is_authenticated', False) and (getattr(user, 'is_superuser', False) or user.groups.filter(name='Photographers').exists())
+        if not is_photographer:
+            qs = qs.filter(is_active=True)
+        return qs
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -43,6 +52,14 @@ class EquipmentDetailView(DetailView):
     model = Equipment
     template_name = 'inventory/equipment_detail.html'
     context_object_name = 'item'
+
+    def get_object(self, queryset = None):
+        obj = super().get_object(queryset)
+        user = self.request.user
+        is_photographer = user.is_authenticated and (user.is_superuser or user.groups.filter(name='Photographers').exists())
+        if not obj.is_active and not is_photographer:
+            raise PermissionDenied
+        return obj
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -79,19 +96,21 @@ class EquipmentByTypeListView(ListView):
     paginate_by = 2
 
     def get_queryset(self):
-        self.equipment_type = self.kwargs['equipment_type']
-        return Equipment.objects.filter(
-            equipment_type=self.equipment_type,
-            is_active=True
-        ).order_by('brand', 'model')
+        qs = Equipment.objects.filter(equipment_type=self.kwargs['equipment_type'])
+        user = self.request.user
+        is_photographer = user.is_authenticated and (user.is_superuser or user.groups.filter(name='Photographers').exists())
+        if not is_photographer:
+            qs = qs.filter(is_active=True)
+        return qs
 
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
-        context['current_type'] = self.equipment_type
+        equipment_type = self.kwargs.get('equipment_type')
+        context['current_type'] = equipment_type
 
         for val, label in Equipment.EquipmentType.choices:
-            if val == self.equipment_type:
+            if val == equipment_type:
                 context['type_label'] = label
                 break
         return context

@@ -57,11 +57,16 @@
                 {% endif %}
             </div>
 
-            <span class="badge text-bg-primary rounded-pill px-3 py-2 mb-2">{{ production.category.name }}</span>
-            <h1 class="display-5 fw-bold mb-3">
-                {{ production.title }}
-                {% featured_badge production.is_featured %}
-            </h1>
+            <div class="d-flex flex-wrap align-items-center gap-2 mb-2">
+                <span class="badge text-bg-primary rounded-pill px-3 py-2">{{ production.category.name }}</span>
+                {% if production.is_featured %}
+                    <span class="badge rounded-pill px-3 py-2 fw-normal"
+                          style="background-color: rgba(255, 200, 50, 0.12); color: #f5c842; border: 1px solid rgba(245, 200, 66, 0.3); font-size: 0.72rem; letter-spacing: 0.03em;">
+                        ✦ Featured
+                    </span>
+                {% endif %}
+            </div>
+            <h1 class="display-5 fw-bold mb-3">{{ production.title }}</h1>
 
             <div class="d-flex align-items-center text-muted mb-4 gap-3 flex-wrap">
                 <span>📍 {{ production.location }}</span>

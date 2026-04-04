@@ -78,10 +78,12 @@
                     <!-- CARD FOOTER -->
                     <div class="card-footer bg-white border-0 p-4 pt-0">
                     <div class="d-flex flex-wrap gap-2">
-                        <a href="{% url 'bookings:booking_request' %}?package={{ package.pk }}"
-                        class="btn btn-success btn-sm rounded-pill px-3">
-                        Book Now →
-                        </a>
+                        {% if package.is_active or request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
+                            <a href="{% url 'bookings:booking_request' %}?package={{ package.pk }}"
+                            class="btn btn-success btn-sm rounded-pill px-3">
+                            Book Now →
+                            </a>
+                        {% endif %}
                         {% if request.user.is_superuser or request.user.groups.all.0.name == 'Photographers' %}
                             <a href="{% url 'bookings:package_edit' package.pk %}"
                             class="btn btn-warning btn-sm text-dark px-3 lm-btn-action">

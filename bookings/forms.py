@@ -82,6 +82,8 @@ class BookingRequestForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
 
+        self.fields['package'].queryset = ServicePackage.objects.filter(is_active=True)
+
         required_by_validation = {'phone', 'city', 'message', 'package'}
         for name in required_by_validation:
             if name in self.fields:

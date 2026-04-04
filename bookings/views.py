@@ -103,7 +103,11 @@ class ServicePackageListView(ListView):
     paginate_by = 5
 
     def get_queryset(self):
-        return super().get_queryset().filter(is_active=True).order_by('category__name', 'price')
+        qs = super().get_queryset().order_by('category__name', 'price')
+        user = self.request.user
+        if not (user.is_superuser or (user.is_authenticated and user.groups.filter(name='Photographers').exists())):
+            qs = qs.filter(is_active=True)
+        return qs
 
     def get_context_data(self, *, object_list = ..., **kwargs):
         context = super().get_context_data(**kwargs)
@@ -144,7 +148,11 @@ class ServicePackageByCategoryListView(ListView):
     paginate_by = 2
 
     def get_queryset(self):
-        return ServicePackage.objects.filter(category_id=self.kwargs['category_id']).order_by('price')
+        qs = ServicePackage.objects.filter(category_id=self.kwargs['category_id']).order_by('price')
+        user = self.request.user
+        if not (user.is_superuser or (user.is_authenticated and user.groups.filter(name='Photographers').exists())):
+            qs = qs.filter(is_active=True)
+        return qs
 
     def get_context_data(self, *, object_list=None, **kwargs):
         context = super().get_context_data(**kwargs)

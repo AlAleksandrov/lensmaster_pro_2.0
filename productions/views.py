@@ -86,7 +86,7 @@ class CategoryListView(ListView):
     model = Category
     template_name = 'productions/category_list.html'
     context_object_name = 'categories'
-    paginate_by = 2
+    paginate_by = 4
 
     def get_queryset(self):
         return Category.objects.all().order_by('name')

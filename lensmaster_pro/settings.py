@@ -67,7 +67,7 @@ CORS_ALLOW_CREDENTIALS = True
 
 PROJECT_APPS = [
     'accounts',
-    'bookings',
+    'bookings.apps.BookingsConfig',
     'common',
     'inventory',
     'productions',

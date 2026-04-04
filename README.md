@@ -294,34 +294,63 @@ The `/accounts/stats/` page is accessible only to Photographers and superusers. 
 
 ## ⚙️ Async Tasks on Render — Django Q2
 
-When a photographer confirms a client booking request, the system needs to send a confirmation email without blocking the HTTP response. This is the primary use case for async task processing in LensMaster Pro — the view confirms the booking, enqueues the email task, and returns immediately, while the worker handles the actual sending in the background.
+LensMaster Pro uses **Django Q2** to process long-running background jobs without blocking the request/response cycle. This is especially important when a photographer confirms a booking request and the application needs to send a confirmation email immediately, but asynchronously.
 
-LensMaster Pro uses **[Django Q2](https://django-q2.readthedocs.io/)** for this on the **Render** deployment. Django Q2 is a native Django task queue that requires no external broker — it uses the existing **PostgreSQL** database as its backend, making it ideal for Render's free-tier environment where Redis is not available.
+Instead of sending the email directly inside the view or form save logic, the project:
+1. detects the status change to `CONFIRMED`,
+2. enqueues a background task with `async_task()`,
+3. lets the Django Q worker process the email in the background,
+4. returns control to the user immediately.
 
 ### How it works
 
 ```
-HTTP Request → Django View → async_task() → ORM Broker (PostgreSQL)
-                                                    ↓
-                                           Django Q2 Cluster Worker
-                                                    ↓
-                                           Task executed in background
+              text Booking status changes to CONFIRMED
+                                ↓
+              Django signal detects the transition
+                                ↓
+              async_task() enqueues the email job
+                                ↓
+              Django Q cluster picks up the task
+                                ↓
+              Background worker sends the confirmation email
 ```
+
+### Why Django Q2?
+
+LensMaster Pro uses Django Q2 on Render because it is a practical fit for this deployment:
+
+- **No external broker required** — it uses the existing PostgreSQL database
+- **Simple local development** — no Redis server needed
+- **Easy monitoring** — tasks are visible in Django Admin
+- **Clean separation of concerns** — views stay focused on HTTP logic, while background jobs handle side effects
 
 ### Configuration (`settings.py`)
 
 ```python
 Q_CLUSTER = {
-    'name': 'lensmaster_orm',
-    'workers': 2,
-    'recycle': 500,
+    'name': 'lensmaster',
+    'workers': 4,
     'timeout': 60,
-    'retry': 120,
+    'retry': 90,
     'queue_limit': 50,
     'bulk': 10,
-    'orm': 'default',   # uses PostgreSQL — no Redis needed
+    'orm': 'default',
 }
 ```
+
+### Task workflow in the project
+
+The booking confirmation flow is implemented in three layers:
+
+#### 1. Signal layer
+A Django signal watches for booking updates and checks whether the status changed from anything else to `CONFIRMED`.
+
+#### 2. Queue layer
+When that transition happens, the signal uses `async_task()` to place the email job into the Django Q queue.
+
+#### 3. Worker layer
+A running `qcluster` process picks up the task and executes the email-sending function in the background.
 
 ### Starting the worker
 
@@ -329,50 +358,68 @@ Q_CLUSTER = {
 python manage.py qcluster
 ```
 
-> On Render, the worker runs as a separate **Background Worker** service defined in `render.yaml`, alongside the main web service.
+Run this in a separate terminal during development. On Render, the worker is configured as a separate background service.
 
-### Example usage
+### Example usage:
+
+```bash
+python manage.py shell
+```
 
 ```python
 from django_q.tasks import async_task
+from bookings.models import BookingRequest
 
-# Fire-and-forget: send booking confirmation email in background
-async_task('bookings.tasks.send_booking_confirmation', booking_id=booking.pk)
+booking = BookingRequest.objects.first()
+if booking:
+    async_task('bookings.tasks.send_booking_confirmation', booking_id=booking.pk)
 ```
 
 ### Task monitoring
 
-Scheduled and completed tasks are visible in the **Django Admin** under the `Django Q` section — no extra tooling required.
+Completed, failed, and queued tasks are visible in the Django Admin under the **Django Q** section. This makes background processing easy to inspect without additional tooling.
+
+### Notes
+
+- The booking confirmation email is sent only when the booking status changes to `CONFIRMED`.
+- The task is executed asynchronously, so the user does not wait for the email server.
+- This implementation is ideal for the Render deployment where PostgreSQL is already available and Redis is not necessary.
 
 ---
 
 ## ☁️ Async Tasks on Azure — Celery & Redis
 
-The same use case applies on Azure — when a photographer confirms a booking request, the confirmation email must be sent asynchronously so the HTTP response is not held up by the mail server. A DRF endpoint receives the confirmation action, enqueues a Celery task, and returns `202 Accepted` immediately. The Celery worker then picks up the task from Redis and processes it independently.
+For the Azure deployment, LensMaster Pro uses **Celery** with **Redis** to handle background jobs asynchronously. The main use case is the same as on Render: when a booking request is confirmed, the confirmation email should be sent without blocking the request/response cycle.
 
-On the **Azure** deployment, LensMaster Pro uses **[Celery](https://docs.celeryq.dev/)** with **Redis** as the message broker for this. The Django REST Framework (DRF) API exposes the endpoint that triggers the task, cleanly separating the confirmation action from the side-effect of sending the email.
+In this setup, the web application places the job into a Redis-backed queue, and a separate Celery worker processes it in the background. This keeps the user interface responsive and makes the system scalable for production use.
 
 ### How it works
 
 ```
-HTTP Request → Django View / DRF Endpoint
-                        ↓
-              task.delay() / task.apply_async()
-                        ↓
-              Redis (message broker)
-                        ↓
-              Celery Worker process
-                        ↓
-              Task executed (DB write, email, etc.)
+              text Booking status changes to CONFIRMED
+                                ↓
+              Django view or signal triggers a Celery task
+                                ↓
+              Task is sent to Redis as the message broker
+                                ↓
+              Celery worker picks up the job
+                                ↓
+              Confirmation email is sent in the background
 ```
 
-### Installation
+### Why Celery + Redis?
 
-```bash
-pip install celery redis django-celery-results
-```
+LensMaster Pro uses Celery on Azure because this stack is a strong fit for production environments:
 
-### Configuration
+- **Reliable task processing** with a mature background job system
+- **Redis message broker** for fast task delivery
+- **Scalable architecture** with separate web and worker processes
+- **Better fit for cloud deployments** where independent worker instances are available
+- **Clean separation of concerns** between the web app and asynchronous work
+
+### Configuration overview
+
+Celery is configured to work with the Django project settings and to autodiscover task modules automatically.
 
 **`lensmaster_pro/celery.py`**
 ```python
@@ -405,7 +452,20 @@ CELERY_TIMEZONE = 'Europe/Sofia'
 INSTALLED_APPS += ['django_celery_results']
 ```
 
-### Defining a task
+### Task workflow in the project
+
+The booking confirmation flow follows three steps:
+
+#### 1. Application layer
+A view or signal detects that a booking has been confirmed.
+
+#### 2. Queue layer
+The application enqueues a Celery task using `.delay()` or `.apply_async()`.
+
+#### 3. Worker layer
+A separate Celery worker receives the job from Redis and sends the confirmation email.
+
+### Example task
 
 ```python
 # bookings/tasks.py
@@ -424,19 +484,14 @@ def send_booking_confirmation(booking_id):
     )
 ```
 
-### Triggering from a DRF view
+### Triggering the task
 
 ```python
-# bookings/api/views.py
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework import status
 from bookings.tasks import send_booking_confirmation
 
-class BookingConfirmView(APIView):
-    def post(self, request, pk):
-        send_booking_confirmation.delay(pk)   # enqueues task, returns immediately
-        return Response({'status': 'queued'}, status=status.HTTP_202_ACCEPTED)
+booking = BookingRequest.objects.first()
+booking_id = booking.pk
+send_booking_confirmation.delay(booking_id)
 ```
 
 ### Starting the worker
@@ -449,19 +504,24 @@ celery -A lensmaster_pro worker --loglevel=info
 celery -A lensmaster_pro worker --loglevel=warning --concurrency=2
 ```
 
-### Azure deployment
+### Azure deployment model
 
-On Azure, the Celery worker runs as a separate **Web Job** or second **App Service** instance pointing to the same Redis and PostgreSQL resources.
+On Azure, the application is split into separate services:
 
 | Component | Azure Service |
 |---|---|
-| **Web App** | Azure App Service (Python 3.12) |
-| **Celery Worker** | Azure App Service (separate slot) or Azure Container Instance |
+| **Web App** | Azure App Service |
+| **Celery Worker** | Azure App Service / Web Job / Container Instance |
 | **Message Broker** | Azure Cache for Redis |
-| **Result Backend** | Azure Database for PostgreSQL (via `django-celery-results`) |
+| **Result Backend** | PostgreSQL via `django-celery-results` |
 | **Media Storage** | Cloudinary |
 
-> Set `REDIS_URL` and all other secrets via **Azure App Service → Configuration → Application Settings** — never hardcode them.
+### Notes
+
+- Celery is used for production-grade asynchronous processing.
+- Redis acts as the broker between the web app and worker.
+- The worker must run continuously to process queued jobs.
+- This architecture is a better match for Azure than Django Q, because it supports distributed task processing and independent worker scaling.
 
 ---
 

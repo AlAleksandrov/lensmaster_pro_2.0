@@ -255,6 +255,7 @@ STATICFILES_FINDERS = [
 
 STATICFILES_STORAGE = "lensmaster_pro.storage.StaticStorage"
 
+
 STORAGES = {
     "default": {
         "BACKEND": "django.core.files.storage.FileSystemStorage" if DEBUG else "cloudinary_storage.storage.MediaCloudinaryStorage",

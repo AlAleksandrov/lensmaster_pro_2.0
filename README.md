@@ -25,6 +25,7 @@
 - [🧩 Custom 404 Page](#-custom-404-page)
 - [💥 Custom 500 Page](#-custom-500-page)
 - [📊 Studio Statistics](#-studio-statistics)
+- [🔌 API Functionality](#-api-functionality)
 - [⚙️ Async Tasks on Render — Django Q2](#️-async-tasks-on-render--django-q2)
 - [☁️ Async Tasks on Azure — Celery & REST](#️-async-tasks-on-azure--celery--rest)
 - [🗃️ Tech Stack](#️-tech-stack)
@@ -314,6 +315,59 @@ The `/accounts/stats/` page is accessible only to Photographers and superusers. 
 - **Bookings by Status** (pending / confirmed / cancelled)
 - **Bookings by Source** (how clients heard about the studio)
 - **KPI Cards**: total productions, equipment, packages, bookings, confirmed bookings
+
+---
+
+## 🔌 API Functionality
+
+LensMaster Pro includes a REST API for bookings and service packages, implemented with **Django REST Framework**. The API currently exposes endpoints for listing, creating, and retrieving selected data from the `bookings` app.
+
+### Available endpoints
+
+#### Service Packages
+- `GET /api/service-packages/`
+  - Returns a list of active service packages.
+  - Supports:
+    - filtering via `ServicePackageFilter`
+    - search by `name` and `description`
+    - ordering by `price` and `duration_hours`
+
+- `GET /api/service-packages/<int:pk>/`
+  - Returns the details of a single service package.
+
+#### Booking Requests
+- `GET /api/booking-requests/`
+  - Returns a list of booking requests.
+  - Supports:
+    - filtering via `BookingRequestFilter`
+    - search by `first_name`, `last_name`, and `email`
+
+- `POST /api/booking-requests/create/`
+  - Creates a new booking request.
+  - If the request is made by an authenticated user, the booking is linked to that user automatically.
+
+### Permissions
+
+- **Service packages**
+  - Read access is available to authenticated and anonymous users.
+  - The list endpoint returns only active packages.
+
+- **Booking requests**
+  - Both listing and creating booking requests require authentication.
+
+### Serializers
+
+The API uses serializer-based validation for:
+- `ServicePackage`
+- `BookingRequest`
+
+For booking requests:
+- `user` and `status` are read-only
+- authenticated users are attached automatically on create
+
+### Notes
+
+The API is focused on the `bookings` app and is ready for future extension with additional endpoints if needed.
 
 ---
 

@@ -194,6 +194,7 @@ EMAIL_USE_SSL=False
 EMAIL_HOST_USER=your_mailjet_API_key
 EMAIL_HOST_PASSWORD=your_mailjet_secret_key
 COMPANY_EMAIL=your_email_verified_in_mailjet
+DEFAULT_FROM_EMAIL=your_email_verified_in_mailjet
 
 ASYNC_TASK_BACKEND=celery # or django_q
 REDIS_URL=redis://localhost:6379/0

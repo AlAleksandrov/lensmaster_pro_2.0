@@ -294,6 +294,17 @@ CELERY_TIMEZONE = 'Europe/Sofia'
 CELERY_TASK_TRACK_STARTED = True
 CELERY_TASK_TIME_LIMIT = 60 * 5
 
+# Azure Redis over TLS/SSL
+if CELERY_BROKER_URL.startswith("rediss://"):
+    CELERY_BROKER_USE_SSL = {
+        "ssl_cert_reqs": "CERT_NONE",
+    }
+
+# Optional, if you ever use Redis as result backend instead of django-db
+CELERY_REDIS_BACKEND_USE_SSL = {
+    "ssl_cert_reqs": "CERT_NONE",
+}
+
 EMAIL_BACKEND = os.getenv(
     "EMAIL_BACKEND",
     "django.core.mail.backends.smtp.EmailBackend",

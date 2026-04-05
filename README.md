@@ -86,7 +86,7 @@ LensMaster Pro implements a layered security model:
 - **`productions/`**: Portfolio categories and project showcases — public browsing + full CRUD for Photographers.
 - **`bookings/`**: Service packages (with per-category filtering) and client booking request flow with status management.
 - **`inventory/`**: Studio equipment tracking with type-based filtering, production linkage, and full CRUD.
-- **`common/`**: Shared abstract models (`TimestampedMixin`, `SlugMixin`, `ActiveStatusMixin`), `PhotographerRequiredMixin`, custom template tags, and global views (Home, 404).
+- **`common/`**: Shared abstract models (`TimestampedMixin`, `SlugMixin`, `ActiveStatusMixin`), `PhotographerRequiredMixin`, custom template tags, and global views (Home, base, 403, 404, 500).
 - **`lensmaster_pro/`**: Core project configuration, URL routing, and custom static file storage.
 
 ---
@@ -165,7 +165,9 @@ Create a `.env` file in the project root:
 ```env
 SECRET_KEY=your-secret-key-here
 DEBUG=True
-ALLOWED_HOSTS=127.0.0.1,localhost
+
+ALLOWED_HOSTS=127.0.0.1,localhost,lensmaster-pro-2-0.onrender.com,lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net
+CSRF_TRUSTED_ORIGINS="http://127.0.0.1,http://localhost,https://lensmaster-pro-2-0.onrender.com,https://lensmasterpro2-ghgmfnbbhfayfneh.spaincentral-01.azurewebsites.net"
 
 DB_ENGINE=django.db.backends.postgresql
 DB_NAME=lensmaster_pro_db
@@ -173,6 +175,27 @@ DB_USER=postgres
 DB_PASSWORD=your_password
 DB_HOST=127.0.0.1
 DB_PORT=5432
+DATABASE_URL=postgresql://DB_USER:DB_PASSWORD@DB_HOST:DB_PORT/DB_NAME
+
+CLOUDINARY_CLOUD_NAME=your_cloudinary_name
+CLOUDINARY_API_KEY=your_cloudinary_api_key
+CLOUDINARY_API_SECRET=your_cloudinary_api_secret
+
+STATIC_URL=/static/
+STATIC_ROOT=staticfiles
+
+# Mailjet is used as the email provider for booking confirmation emails
+EMAIL_BACKEND=django.core.mail.backends.smtp.EmailBackend
+EMAIL_HOST=in-v3.mailjet.com
+EMAIL_PORT=587
+EMAIL_USE_TLS=True
+EMAIL_USE_SSL=False
+EMAIL_HOST_USER=your_mailjet_API_key
+EMAIL_HOST_PASSWORD=your_mailjet_secret_key
+COMPANY_EMAIL=your_email_verified_in_mailjet
+
+ASYNC_TASK_BACKEND=celery # or django_q
+REDIS_URL=redis://localhost:6379/0
 ```
 
 ### 4) Initialize Database
@@ -206,7 +229,7 @@ To simplify evaluation, the project includes pre-configured users:
 |---|---|
 | 3 Photographers | alex_lens, maria_photo, ivan_shoot → group Photographers |
 | 7 Regular Users | sofia_bride, peter_corp, elena_events, georgi_client, anna_wedding, nikola_biz, diana_art → group Clients |
-| Password | Test1234! (one pass for all) |
+| Password | Test1234! 'for all') |
 
 > Admin and Photographers has full CRUD + access to `/accounts/stats/`
 
@@ -252,13 +275,11 @@ To simplify evaluation, the project includes pre-configured users:
 ---
 
 ## 🔒 Custom 403 Page
-To test the access denied error handler, set `DEBUG=False` in your `.env`, go to Service package or Inventory list page like admin or photographer. Choose some package or equipment from the list, then in the package or equipment detail view page remember the number in url (<int:pk>) and click "Edit Package" button. Then uncheck Active and save changes. Visit anonymous (client) that route:
+To test the access denied error handler, set `DEBUG=False` in your `.env`, go to a service package or inventory list page as an admin or photographer, choose any package or equipment from the list, then open its detail page and note the `<int:pk>` from the URL. Click the **Edit** button, uncheck **Active**, and save the changes. Visit the same route as an anonymous user or a regular client:
 ```
 http://127.0.0.1:8000/bookings/packages/<int:pk>/
 
 http://127.0.0.1:8000/inventory/<int:pk>/
-
-Visit anonymous (client) that route:
 
 http://127.0.0.1:8000/accounts/stats/
 ```
@@ -364,7 +385,7 @@ python manage.py qcluster
 
 Run this in a separate terminal during development. On Render, the worker is configured as a separate background service.
 
-### Example usage:
+### Example usage with shell:
 
 ```bash
 python manage.py shell
@@ -420,6 +441,7 @@ LensMaster Pro uses Celery on Azure because this stack is a strong fit for produ
 - **Scalable architecture** with separate web and worker processes
 - **Better fit for cloud deployments** where independent worker instances are available
 - **Clean separation of concerns** between the web app and asynchronous work
+- **Mailjet SMTP** for transactional emails such as booking confirmations
 
 ### Configuration overview
 
@@ -447,11 +469,30 @@ __all__ = ('celery_app',)
 **`settings.py`**
 ```python
 CELERY_BROKER_URL = os.environ.get('REDIS_URL', 'redis://localhost:6379/0')
-CELERY_RESULT_BACKEND = 'django-db'   # stores results in PostgreSQL via django-celery-results
+CELERY_RESULT_BACKEND = 'django-db'
 CELERY_ACCEPT_CONTENT = ['json']
 CELERY_TASK_SERIALIZER = 'json'
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TIMEZONE = 'Europe/Sofia'
+CELERY_TASK_TRACK_STARTED = True
+CELERY_TASK_TIME_LIMIT = 60 * 5
+
+EMAIL_BACKEND = os.getenv(
+    "EMAIL_BACKEND",
+    "django.core.mail.backends.smtp.EmailBackend",
+)
+
+EMAIL_HOST = os.getenv("EMAIL_HOST", "in-v3.mailjet.com")
+EMAIL_PORT = int(os.getenv("EMAIL_PORT", "587"))
+EMAIL_USE_TLS = os.getenv("EMAIL_USE_TLS", "True") == "True"
+EMAIL_USE_SSL = os.getenv("EMAIL_USE_SSL", "False") == "True"
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER", "")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD", "")
+
+DEFAULT_FROM_EMAIL = os.getenv(
+    "DEFAULT_FROM_EMAIL",
+    EMAIL_HOST_USER or "noreply@lensmaster.com",
+)
 
 INSTALLED_APPS += ['django_celery_results']
 ```
@@ -498,11 +539,27 @@ booking_id = booking.pk
 send_booking_confirmation.delay(booking_id)
 ```
 
+### Running Redis with Docker locally
+
+If you do not have Redis installed locally, you can start it with Docker:
+```bash
+# Start Redis server
+docker run -d --name redis -p 6379:6379 redis
+
+# Check Redis is working
+docker ps
+>STATUS: Up
+
+# Test
+docker exec -it redis redis-cli ping
+>PONG
+```
+
 ### Starting the worker
 
 ```bash
 # Development
-celery -A lensmaster_pro worker --loglevel=info
+celery -A lensmaster_pro worker -P solo -l info
 
 # Production (with concurrency)
 celery -A lensmaster_pro worker --loglevel=warning --concurrency=2

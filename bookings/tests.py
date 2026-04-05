@@ -3,6 +3,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from .models import BookingRequest, ServicePackage
 from datetime import date
+from django.contrib.auth.models import Group
 
 User = get_user_model()
 
@@ -10,6 +11,9 @@ User = get_user_model()
 class BookingTests(TestCase):
     def setUp(self):
         self.user = User.objects.create_user(username='photographer', password='pass123')
+        photographers_group, _ = Group.objects.get_or_create(name='Photographers')
+        self.user.groups.add(photographers_group)
+
         self.package = ServicePackage.objects.create(
             name="Basic",
             price=50,
@@ -44,6 +48,7 @@ class BookingTests(TestCase):
         self.assertEqual(response.status_code, 200)
 
     def test_booking_list_view(self):
+        self.client.login(username='photographer', password='pass123')
         response = self.client.get(reverse('bookings:booking_list'))
         self.assertEqual(response.status_code, 200)
 

@@ -27,4 +27,5 @@ urlpatterns = [
         path('delete/', views.BookingDeleteView.as_view(), name='booking_delete'),
         ]),
     ),
+    path('api/', include('bookings.urls_api')),
 ]

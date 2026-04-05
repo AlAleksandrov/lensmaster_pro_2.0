@@ -25,7 +25,7 @@
 - [🧩 Custom 404 Page](#-custom-404-page)
 - [💥 Custom 500 Page](#-custom-500-page)
 - [📊 Studio Statistics](#-studio-statistics)
-- [🔌 API Functionality](#-api-functionality)
+- [🔌 RESTful API Functionalities](#-restful-api-functionalities)
 - [⚙️ Async Tasks on Render — Django Q2](#️-async-tasks-on-render--django-q2)
 - [☁️ Async Tasks on Azure — Celery & REST](#️-async-tasks-on-azure--celery--rest)
 - [🗃️ Tech Stack](#️-tech-stack)
@@ -318,7 +318,7 @@ The `/accounts/stats/` page is accessible only to Photographers and superusers. 
 
 ---
 
-## 🔌 API Functionality
+## 🔌 RESTful API Functionalities
 
 LensMaster Pro includes a REST API for bookings and service packages, implemented with **Django REST Framework**. The API currently exposes endpoints for listing, creating, and retrieving selected data from the `bookings` app.
 

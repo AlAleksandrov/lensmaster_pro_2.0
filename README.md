@@ -562,7 +562,7 @@ docker exec -it redis redis-cli ping
 celery -A lensmaster_pro worker -P solo -l info
 
 # Production (with concurrency)
-celery -A lensmaster_pro worker --loglevel=warning --concurrency=2
+celery -A lensmaster_pro worker --loglevel=warning --concurrency=2 --uid=nobody
 ```
 
 ### Azure deployment model

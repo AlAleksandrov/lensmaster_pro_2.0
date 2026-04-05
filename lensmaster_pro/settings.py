@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/6.0/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/6.0/ref/settings/
 """
-
+import ssl
 from pathlib import Path
 import os
 import dj_database_url
@@ -297,12 +297,12 @@ CELERY_TASK_TIME_LIMIT = 60 * 5
 # Azure Redis over TLS/SSL
 if CELERY_BROKER_URL.startswith("rediss://"):
     CELERY_BROKER_USE_SSL = {
-        "ssl_cert_reqs": "CERT_NONE",
+        "ssl_cert_reqs": ssl.CERT_NONE,
     }
 
 # Optional, if you ever use Redis as result backend instead of django-db
 CELERY_REDIS_BACKEND_USE_SSL = {
-    "ssl_cert_reqs": "CERT_NONE",
+    "ssl_cert_reqs": ssl.CERT_NONE,
 }
 
 EMAIL_BACKEND = os.getenv(

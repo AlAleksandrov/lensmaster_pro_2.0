@@ -19,8 +19,9 @@
 - [🗂️ Directory Structure](#️-directory-structure)
 - [🚀 Installation & Setup](#-installation--setup)
 - [🌐 Live Demo](#-live-demo)
+- [🧪 Testing](#-testing)
 - [🖼️ Screenshots](#️-screenshots)
-- [🧪 Data Management](#-data-management)
+- [🗄️ Data Management](#-data-management)
 - [🔒 Custom 403 Page](#-custom-403-page)
 - [🧩 Custom 404 Page](#-custom-404-page)
 - [💥 Custom 500 Page](#-custom-500-page)
@@ -46,6 +47,7 @@
 - **Package Filtering**: Service packages grouped by category with dedicated per-category listing pages.
 - **Cloudinary Integration**: Production image storage via Cloudinary in deployed environments; local filesystem in development.
 - **Production Ready**: PostgreSQL, environment-based configuration, WhiteNoise static files, and custom 403, 404, and 500 error handling.
+- **Automated Test Coverage**: Includes 30+ automated tests covering models, forms, views, permissions, and critical user flows.
 
 ---
 
@@ -237,6 +239,23 @@ To simplify evaluation, the project includes pre-configured users:
 
 ---
 
+## 🧪 Testing
+
+LensMaster Pro includes **30+ automated tests**, demonstrating a strong focus on code reliability, maintainability, and production readiness.
+
+### Covered areas:
+- models and business rules
+- forms and validation
+- class-based views and CRUD flows
+- permissions and access control
+- booking and profile-related user journeys
+
+### Run tests
+```bash
+python manage.py test
+
+---
+
 ## 🌐 Live Demo
 
 - [Live Demo — Render](https://lensmaster-pro-2-0.onrender.com)
@@ -256,7 +275,7 @@ To simplify evaluation, the project includes pre-configured users:
 
 ---
 
-## 🧪 Data Management
+## 🗄️ Data Management
 
 ### Via the Site UI (recommended)
 1. Register an account and assign it to the `Photographers` group via Admin.

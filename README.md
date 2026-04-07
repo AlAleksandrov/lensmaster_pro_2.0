@@ -21,6 +21,7 @@
 - [🌐 Live Demo](#-live-demo)
 - [🖼️ Screenshots](#️-screenshots)
 - [🧪 Data Management](#-data-management)
+- [🧪 Testing](#-testing)
 - [🔒 Custom 403 Page](#-custom-403-page)
 - [🧩 Custom 404 Page](#-custom-404-page)
 - [💥 Custom 500 Page](#-custom-500-page)
@@ -273,6 +274,81 @@ To simplify evaluation, the project includes pre-configured users:
 4. Add **Service Packages**.
 5. Add **Productions** linked to categories.
 6. Manage **Booking Requests** and update their status.
+
+---
+
+## 🧪 Testing
+
+LensMaster Pro includes **39 automated tests** covering core functionality across all major modules. The test suite validates models, views, permissions, and business logic to ensure reliability and stability.
+
+### Test Coverage by Module
+
+| Module | Tests | Focus Areas |
+|---|---|---|
+| **accounts** | 10 | User authentication, profile management, stats access control |
+| **bookings** | 10 | Booking requests, service packages, API endpoints, status management |
+| **inventory** | 9 | Equipment CRUD, internal ID generation, type filtering, permissions |
+| **productions** | 9 | Portfolio categories, productions, slug auto-generation, CRUD permissions |
+| **common** | 0 | Shared utilities (tested indirectly via other modules) |
+| **Total** | **39** | Full application coverage |
+
+### Test Categories
+
+The test suite validates:
+
+- **Model Layer**: String representations, default values, auto-generated fields (slugs, internal IDs)
+- **View Layer**: HTTP status codes, template rendering, context data
+- **Authentication**: Login/logout flows, credential validation
+- **Authorization**: Permission checks, role-based access control (`PhotographerRequiredMixin`)
+- **API Endpoints**: REST API listing, filtering, serialization, and creation
+- **Business Logic**: Booking status transitions, favorites system, profile auto-fill
+
+### Running Tests
+
+To run the full test suite:
+```bash
+# Run all tests
+python manage.py test
+
+# Run tests for a specific module
+python manage.py test accounts
+python manage.py test bookings
+python manage.py test inventory
+python manage.py test productions
+
+# Run with verbose output
+python manage.py test --verbosity=2
+
+# Run a specific test class
+python manage.py test accounts.tests.AccountsTests
+
+# Run a specific test method
+python manage.py test accounts.tests.AccountsTests.test_login_with_valid_credentials
+```
+
+### Example Test Output
+
+```bash
+$ python manage.py test
+Creating test database for alias 'default'...
+System check identified no issues (0 silenced).
+.......................................
+----------------------------------------------------------------------
+Ran 39 tests in 2.45s
+
+OK
+Destroying test database for alias 'default'...
+```
+
+### Test Structure
+
+All tests follow Django's `TestCase` class and use standard assertions:
+- `assertEqual()` / `assertNotEqual()`
+- `assertTrue()` / `assertFalse()`
+- `assertContains()` / `assertNotContains()`
+- `assertIn()` / `assertNotIn()`
+
+Each test class includes a `setUp()` method to create necessary test data (users, groups, model instances) and tear down automatically after each test.
 
 ---
 

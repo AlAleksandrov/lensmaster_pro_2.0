@@ -253,6 +253,7 @@ LensMaster Pro includes **30+ automated tests**, demonstrating a strong focus on
 ### Run tests
 ```bash
 python manage.py test
+```
 
 ---
 

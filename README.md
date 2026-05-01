@@ -1,3 +1,7 @@
+> 🚀 **LensMaster Pro 3.0 is now in development!**
+> We're building the SaaS version. Follow progress here: [lensmaster_pro_3.0](https://github.com/AlAleksandrov/lensmaster_pro_3.0)
+
+
 # 📷 LensMaster Pro
 
 ![Python](https://img.shields.io/badge/python-3.14-blue.svg)

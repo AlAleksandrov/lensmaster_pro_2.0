@@ -2,7 +2,7 @@
 > We're building the SaaS version. Follow progress here: [lensmaster_pro_3.0](https://github.com/AlAleksandrov/lensmaster_pro_3.0)
 
 
-# 📷 LensMaster Pro
+# 📷 LensMaster Pro 2.0
 
 ![Python](https://img.shields.io/badge/python-3.14-blue.svg)
 ![Django](https://img.shields.io/badge/django-6.0.3-green.svg)
